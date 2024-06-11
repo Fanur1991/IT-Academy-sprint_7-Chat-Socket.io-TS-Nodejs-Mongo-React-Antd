@@ -19,10 +19,11 @@ import {
   EyeInvisibleOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
-import GoogleLoginButton from '../components/GoogleLoginButton';
+// import GoogleLoginButton from '../components/GoogleLoginButton';
+import getGoogleOauthUrl from '../utils/getGoogleUrl';
 
 const { TabPane } = Tabs;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
 const rooms = [
@@ -49,26 +50,21 @@ const AuthPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('register');
   const navigate = useNavigate();
 
-  const handleLogin = async (values: {
-    email: string;
-    password: string;
-    room: string;
-  }) => {
+  const handleLogin = async (values: { email: string; password: string }) => {
     try {
       const response = await axios.post('http://localhost:5555/login', {
         email: values.email,
         password: values.password,
-        room: values.room,
       });
 
+      navigate('/');
+
       console.log('Login successful:', response.data.user);
-      localStorage.setItem('token', response.data.user.token);
-      localStorage.setItem('userId', response.data.user._id);
-      localStorage.setItem('room', values.room);
+      sessionStorage.setItem('token', response.data.user.token);
+      sessionStorage.setItem('userId', response.data.user._id);
+      sessionStorage.setItem('room', response.data.user.room[0]);
 
       message.success('Login successful');
-
-      navigate('/');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         console.log('Login error:', error.response.data);
@@ -92,14 +88,14 @@ const AuthPage: React.FC = () => {
         room: values.room,
         password: values.password,
       });
+      navigate('/');
+
       console.log('Registration successful:', response.data);
-      localStorage.setItem('token', response.data.user.token);
-      localStorage.setItem('userId', response.data.user._id);
-      localStorage.setItem('room', values.room);
+      sessionStorage.setItem('token', response.data.user.token);
+      sessionStorage.setItem('userId', response.data.user._id);
+      sessionStorage.setItem('room', values.room);
 
       message.success('Registration successful');
-
-      navigate('/');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         console.log('Registration error:', error.response.data);
@@ -158,16 +154,6 @@ const AuthPage: React.FC = () => {
                 />
               </Form.Item>
               <Form.Item
-                name="room"
-                rules={[{ required: true, message: 'Please input!' }]}
-              >
-                <Select allowClear showSearch placeholder="Select room">
-                  {rooms.map(room => (
-                    <Option key={room}>{room}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
                 name="password"
                 rules={[
                   { required: true, message: 'Please input your Password!' },
@@ -188,7 +174,7 @@ const AuthPage: React.FC = () => {
                   htmlType="submit"
                   style={{ width: '100%', height: 55 }}
                 >
-                  Log in
+                  Log in 🚀
                 </Button>
               </Form.Item>
             </Form>
@@ -243,7 +229,7 @@ const AuthPage: React.FC = () => {
                   htmlType="submit"
                   style={{ width: '100%', height: 55 }}
                 >
-                  Register
+                  Register 🚀
                 </Button>
               </Form.Item>
               <Divider
@@ -252,7 +238,10 @@ const AuthPage: React.FC = () => {
                 orientation="center"
               />
               <Form.Item>
-                <GoogleLoginButton />
+                {/* <GoogleLoginButton /> */}
+                <a href={getGoogleOauthUrl()}>
+                  Login with Google
+                </a>
               </Form.Item>
             </Form>
           </TabPane>

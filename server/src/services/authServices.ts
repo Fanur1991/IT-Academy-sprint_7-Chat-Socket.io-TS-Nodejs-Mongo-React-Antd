@@ -11,13 +11,15 @@ import {
   Token,
   VerifiedToken,
 } from '../types.d';
+import qs from 'qs';
 import UserModel from '../models/UserModel';
+import axios from 'axios';
 
 dotenv.config();
 
 const JWT_SECRET: string = process.env.JWT_SECRET as string;
 
-const hashPassword = async (password: string): Promise<HashPassword> => {
+export const hashPassword = async (password: string): Promise<HashPassword> => {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
 };
@@ -73,7 +75,7 @@ export const createUser = async (userData: ICreateUser): Promise<IUser> => {
 
 export const loginUser = async (userData: ILoginUser): Promise<IUser> => {
   try {
-    const { email, password, room } = userData;
+    const { email, password } = userData;
 
     const foundUser = await UserModel.findOne({ email });
 
@@ -124,5 +126,91 @@ export const getUserData = async (_id: string): Promise<IGetUser> => {
       throw error;
     }
     throw new Error('Failed to create user due to internal error');
+  }
+};
+
+interface GoogleTokenResult {
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string;
+  id_token: string;
+}
+
+export const getGoogleAuthTokens = async ({
+  code,
+}: {
+  code: string;
+}): Promise<GoogleTokenResult> => {
+  const url = 'https://oauth2.googleapis.com/token';
+
+  const values = {
+    code,
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: process.env.REDIRECT_URI,
+    grant_type: 'authorization_code',
+  };
+
+  try {
+    const res = await axios.post<GoogleTokenResult>(url, qs.stringify(values), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+    return res.data;
+  } catch (error: any) {
+    console.error(error, 'Failed to fetch Google access token');
+    throw new Error('Failed to fetch Google access token');
+  }
+};
+
+interface GoogleUserResult {
+  id: string;
+  email: string;
+  verified_email: boolean;
+  name: string;
+  given_name: string;
+  family_name: string;
+  picture: string;
+  locale: string;
+}
+
+export const getGoogleUser = async ({
+  id_token,
+  access_token,
+}: {
+  id_token: string;
+  access_token: string;
+}): Promise<GoogleUserResult> => {
+  try {
+    const res = await axios.get<GoogleUserResult>(
+      `https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${access_token}`,
+      {
+        headers: {
+          Authorization: `Bearer ${id_token}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error, 'Failed to fetch Google user');
+    throw new Error('Failed to fetch Google user');
+  }
+};
+
+export const findAndUpdateUser = async (
+  query: any,
+  update: any,
+  options: any = {}
+) => {
+  try {
+    // const hashedPassword = await hashPassword(update.password);
+    // update.passwordHash = hashedPassword;
+    return UserModel.findOneAndUpdate(query, update, options);
+  } catch (error) {
+    console.error('Failed to update user:', error);
+    throw new Error('Failed to update user');
   }
 };

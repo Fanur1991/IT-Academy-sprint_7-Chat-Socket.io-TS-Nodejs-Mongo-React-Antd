@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { ConfigProvider } from 'antd';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+// import { GoogleOAuthProvider } from '@react-oauth/google';
 
-const clientId =
-  '224726940114-e4lkjubonrenj2h04ig1nj6nvf0409og.apps.googleusercontent.com';
+  // const clientId =
+  //   '224726940114-e4lkjubonrenj2h04ig1nj6nvf0409og.apps.googleusercontent.com';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -45,9 +45,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         },
       }}
     >
-      <GoogleOAuthProvider clientId={clientId}>
+      {/* <GoogleOAuthProvider clientId={clientId}> */}
         <App />
-      </GoogleOAuthProvider>
+      {/* </GoogleOAuthProvider> */}
     </ConfigProvider>
   </React.StrictMode>
 );

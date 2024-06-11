@@ -9,7 +9,7 @@ import Dashboard from './pages/dashboard';
 import AuthPage from './pages/AuthPage';
 
 const App: React.FC = () => {
-  const isAuthenticated = !!localStorage.getItem('token');
+  const isAuthenticated = !!sessionStorage.getItem('token');
 
   return (
     <Router>

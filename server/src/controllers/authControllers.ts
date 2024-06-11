@@ -1,27 +1,40 @@
 import { Request, Response } from 'express';
 import { ICreateUser, ILoginUser } from '../types.d';
-import { createUser, getUserData, loginUser } from '../services/authServices';
-import { OAuth2Client } from 'google-auth-library';
+import {
+  createUser,
+  getUserData,
+  getGoogleAuthTokens,
+  loginUser,
+  getGoogleUser,
+  findAndUpdateUser,
+  hashPassword,
+} from '../services/authServices';
+// import { OAuth2Client } from 'google-auth-library';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-const client = new OAuth2Client(CLIENT_ID);
+// const client = new OAuth2Client({ clientId: CLIENT_ID });
 
-async function verifyToken(token: string) {
-  try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    return payload;
-  } catch (error) {
-    console.error("Failed to verify token:", error);
-    throw new Error("Failed to verify token");
-  }
-}
+// async function verifyTokenWithGoogleAPI(accessToken: string) {
+//   try {
+//     const response = await axios.get(
+//       `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`
+//     );
+//     const data = response.data;
+
+//     // Дополнительные проверки (например, проверка audience)
+//     if (data.aud !== CLIENT_ID) {
+//       throw new Error('Token was not issued for this application');
+//     }
+
+//     return data;
+//   } catch (error) {
+//     console.error('Failed to verify token with Google API:', error);
+//     throw new Error('Token verification failed');
+//   }
+// }
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -47,9 +60,9 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, room, password } = req.body as ILoginUser;
+    const { email, password } = req.body as ILoginUser;
 
-    const user = await loginUser({ email, room, password });
+    const user = await loginUser({ email, password });
 
     if (!user) {
       res.status(400).json({ message: 'Failed to login' });
@@ -91,18 +104,66 @@ export const getMe = async (req: Request, res: Response) => {
 
 export const googleAuth = async (req: Request, res: Response) => {
   try {
-    const token = req.headers.authorization as string;
+    // const token = req.headers.authorization?.split(' ')[1] as string;
 
-    const userInfo = await verifyToken(token);
-    if (!userInfo) {
-      return res.status(401).json({ message: 'Authentication failed' });
+    // if (!token) {
+    //   return res.status(401).json({ message: 'No token provided' });
+    // }
+
+    // const userInfo = await verifyToken(token);
+    // if (!userInfo) {
+    //   return res.status(401).json({ message: 'Authentication failed' });
+    // }
+
+    // console.log('USER INFO:', userInfo);
+
+    // res
+    //   .status(200)
+    //   .json({ message: 'Authentication successful', user: userInfo });
+
+    // Get the code from qs
+    const code = req.query.code as string;
+
+    // Get the id_token and access_token with the code
+    const { id_token, access_token } = await getGoogleAuthTokens({ code });
+
+    // Get the user info with the id_token
+    const googleUser = await getGoogleUser({ id_token, access_token });
+
+    console.log('GOOGLE USER:', googleUser.email);
+
+    if (!googleUser) {
+      return res
+        .status(403)
+        .json({ message: 'Google account is not verified' });
     }
-    // Handle successful authentication here (e.g., create user session, return user data)
-    res
-      .status(200)
-      .json({ message: 'Authentication successful', user: userInfo });
-  } catch (error) {
+
+    // upsert the user
+    const hashedPassword = await hashPassword(googleUser.id);
+
+    const user = await findAndUpdateUser(
+      { email: googleUser.email },
+      {
+        $set: {
+          email: googleUser.email,
+          username: googleUser.name,
+          passwordHash: hashedPassword,
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    // add the user
+    const newUser = await createUser({
+      username: googleUser.name,
+      email: googleUser.email,
+      password: googleUser.id,
+      room: googleUser.locale,
+    });
+  } catch (error: any) {
     console.error('Authentication error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res
+      .status(500)
+      .json({ message: 'Internal Server Error', error: error.message });
   }
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommentOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Layout, Menu, theme, Typography, Flex, Avatar } from 'antd';
+import { Layout, Menu, theme, Typography, Flex, Avatar, Button } from 'antd';
 import axios from 'axios';
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -22,12 +22,15 @@ const Dashboard: React.FC = () => {
     room: [],
   });
   const [token, setToken] = useState<string>(
-    localStorage.getItem('token') || ''
+    sessionStorage.getItem('token') || ''
   );
   const [userId, setUserId] = useState<string>(
-    localStorage.getItem('userId') || ''
+    sessionStorage.getItem('userId') || ''
   );
-  const [room, setRoom] = useState<string>(localStorage.getItem('room') || '');
+  const [room, setRoom] = useState<string>(
+    sessionStorage.getItem('room') || ''
+  );
+  const [avatarSeed, setAvatarSeed] = useState(() => Math.random().toFixed(2));
   const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -37,21 +40,8 @@ const Dashboard: React.FC = () => {
     {
       key: '1',
       icon: <CommentOutlined />,
-      label: `${room}`,
+      label: `${room || 'default'}`,
       path: '/',
-    },
-    {
-      key: '2',
-      icon: <LogoutOutlined />,
-      label: 'Logout',
-      path: '/login',
-      onClick: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('room');
-        localStorage.clear();
-        window.location.reload();
-      },
     },
   ];
 
@@ -73,11 +63,11 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    if (token) {
-      fetchUserData();
-    } else {
+    if (!token) {
       navigate('/login');
     }
+
+    fetchUserData();
   }, [token, navigate]);
 
   const handleMenuClick = (item: any) => {
@@ -98,9 +88,7 @@ const Dashboard: React.FC = () => {
         >
           <Flex align="center" justify="center" gap="10px">
             <Avatar
-              src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${
-                Math.random() * (10 - 1) + 1
-              }`}
+              src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${avatarSeed}`}
             />
             <Text
               style={{
@@ -131,11 +119,25 @@ const Dashboard: React.FC = () => {
       <Layout>
         <Header
           style={{
-            padding: 0,
-            // background: colorBgContainer,
+            display: 'flex',
+            justifyContent: 'end',
+            alignItems: 'center',
+            padding: '0',
             overflow: 'initial',
           }}
-        />
+        >
+          <Button
+            type="link"
+            style={{ marginRight: '64px', color: '#F5F5F5' }}
+            onClick={() => {
+              sessionStorage.clear();
+              navigate('/login', { replace: true });
+            }}
+          >
+            Logout
+            <LogoutOutlined />
+          </Button>
+        </Header>
         <Content
           style={{
             display: 'flex',

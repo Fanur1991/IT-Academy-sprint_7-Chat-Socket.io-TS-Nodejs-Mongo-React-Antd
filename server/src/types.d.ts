@@ -19,7 +19,6 @@ export interface ICreateUser {
 
 export interface ILoginUser {
   email: string;
-  room: string;
   password: string;
 }
 
