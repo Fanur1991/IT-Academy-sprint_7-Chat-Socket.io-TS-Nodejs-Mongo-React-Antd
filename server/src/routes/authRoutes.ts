@@ -19,7 +19,6 @@ router.post('/login', login);
 router.get('/api/users/:id', authMiddleware, getMe);
 
 // google auth
-// router.post('/google-auth', googleAuth);
 router.get('/api/google-auth', googleAuth);
 
 export default router;

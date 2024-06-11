@@ -9,32 +9,9 @@ import {
   findAndUpdateUser,
   hashPassword,
 } from '../services/authServices';
-// import { OAuth2Client } from 'google-auth-library';
 import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
 
 dotenv.config();
-
-// const client = new OAuth2Client({ clientId: CLIENT_ID });
-
-// async function verifyTokenWithGoogleAPI(accessToken: string) {
-//   try {
-//     const response = await axios.get(
-//       `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`
-//     );
-//     const data = response.data;
-
-//     // Дополнительные проверки (например, проверка audience)
-//     if (data.aud !== CLIENT_ID) {
-//       throw new Error('Token was not issued for this application');
-//     }
-
-//     return data;
-//   } catch (error) {
-//     console.error('Failed to verify token with Google API:', error);
-//     throw new Error('Token verification failed');
-//   }
-// }
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -104,23 +81,6 @@ export const getMe = async (req: Request, res: Response) => {
 
 export const googleAuth = async (req: Request, res: Response) => {
   try {
-    // const token = req.headers.authorization?.split(' ')[1] as string;
-
-    // if (!token) {
-    //   return res.status(401).json({ message: 'No token provided' });
-    // }
-
-    // const userInfo = await verifyToken(token);
-    // if (!userInfo) {
-    //   return res.status(401).json({ message: 'Authentication failed' });
-    // }
-
-    // console.log('USER INFO:', userInfo);
-
-    // res
-    //   .status(200)
-    //   .json({ message: 'Authentication successful', user: userInfo });
-
     // Get the code from qs
     const code = req.query.code as string;
 
@@ -160,6 +120,9 @@ export const googleAuth = async (req: Request, res: Response) => {
       password: googleUser.id,
       room: googleUser.locale,
     });
+
+    // redirect back to the client
+    res.redirect(`${process.env.CLIENT_URL}`);
   } catch (error: any) {
     console.error('Authentication error:', error);
     res

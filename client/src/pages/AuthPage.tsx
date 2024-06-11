@@ -19,8 +19,8 @@ import {
   EyeInvisibleOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
-// import GoogleLoginButton from '../components/GoogleLoginButton';
 import getGoogleOauthUrl from '../utils/getGoogleUrl';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const { TabPane } = Tabs;
 const { Title } = Typography;
@@ -238,10 +238,7 @@ const AuthPage: React.FC = () => {
                 orientation="center"
               />
               <Form.Item>
-                {/* <GoogleLoginButton /> */}
-                <a href={getGoogleOauthUrl()}>
-                  Login with Google
-                </a>
+                <GoogleLoginButton href={getGoogleOauthUrl()} />
               </Form.Item>
             </Form>
           </TabPane>
