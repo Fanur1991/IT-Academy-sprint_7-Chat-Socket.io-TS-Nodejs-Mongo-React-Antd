@@ -19,15 +19,16 @@ export class Server {
   constructor(port: string) {
     this.port = port;
     this.express = express();
-    this.express.use(helmet());
+    // this.express.use(helmet());
     this.express.use(
       cors({
-        origin: 'http://localhost:5173',
+        origin: ['http://localhost:5173'],
         credentials: true,
+        methods: ['GET', 'POST', 'OPTIONS'],
       })
     );
     this.express.use(json());
-    this.express.use(urlencoded({ extended: true }));
+    // this.express.use(urlencoded({ extended: true }));
     this.express.use((_req, res, next) => {
       res.header('Cross-Origin-Opener-Policy', 'same-origin');
       res.header('Cross-Origin-Embedder-Policy', 'require-corp');
@@ -43,14 +44,12 @@ export class Server {
     this.io = new SocketIOServer(this.server, {
       cors: {
         origin: 'http://localhost:5173',
-        methods: ['GET', 'POST', 'OPTIONS'],
+        methods: ['GET', 'POST'],
         credentials: true,
       },
     });
 
-    this.io.on('connection', socket => {
-      console.log(`User connected ${socket.id}`);
-    });
+    this.io.on('connection', socket => handleConnection(socket, this.io));
   }
 
   async listen(): Promise<void> {

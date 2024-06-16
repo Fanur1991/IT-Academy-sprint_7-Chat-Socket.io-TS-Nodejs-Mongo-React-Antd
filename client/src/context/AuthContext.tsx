@@ -13,7 +13,7 @@ export const useAuthContext = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }: IAuthProviderProps) => {
+export const AuthProvider: React.FC<IAuthProviderProps> = ({ children }) => {
   const [authUser, setAuthUser] = useState<IUser | null>(() => {
     const storedUser =
       sessionStorage.getItem('userData') || Cookies.get('userData');

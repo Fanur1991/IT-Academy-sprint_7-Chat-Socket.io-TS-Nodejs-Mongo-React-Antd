@@ -9,11 +9,10 @@ import Dashboard from './pages/dashboard';
 import AuthPage from './pages/AuthPage';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useAuthContext } from './context/AuthContext';
+import { useSocketContext } from './context/SocketContext';
 
 const App: React.FC = () => {
   const { authUser } = useAuthContext();
-
-  console.log(authUser);
 
   // const router = createBrowserRouter([
   //   {

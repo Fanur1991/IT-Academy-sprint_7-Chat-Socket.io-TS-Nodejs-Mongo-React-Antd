@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { CommentOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme, Typography, Flex, Avatar, Button } from 'antd';
 import Cookies from 'js-cookie';
@@ -8,7 +7,7 @@ import Chat from '../components/Chat';
 import { useAuthContext } from '../context/AuthContext';
 
 const { Header, Content, Footer, Sider } = Layout;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 type UserData = {
   _id: string;
@@ -37,7 +36,7 @@ const Dashboard: React.FC = () => {
     {
       key: '1',
       icon: <CommentOutlined />,
-      label: `${room || 'default'}`,
+      label: room,
       path: '/',
     },
   ];
@@ -140,7 +139,7 @@ const Dashboard: React.FC = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            {/* <Chat room={room} /> */}
+            <Chat room={room} />
           </div>
           <div
             style={{
