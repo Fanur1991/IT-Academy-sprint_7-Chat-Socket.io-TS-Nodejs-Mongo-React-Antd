@@ -7,15 +7,7 @@ dotenv.config();
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5555',
-        changeOrigin: true,
-      },
-    },
-  },
+  base: './',
   define: {
     'process.env': JSON.stringify(process.env),
   },

@@ -7,6 +7,7 @@ import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { handleConnection } from '../handlers/chatHandlers';
 import authRoutes from '../routes/authRoutes';
+import cookieParser from 'cookie-parser';
 // import chatRoomRoutes from '../routes/chatRoomRoutes';
 
 export class Server {
@@ -19,7 +20,12 @@ export class Server {
     this.port = port;
     this.express = express();
     this.express.use(helmet());
-    this.express.use(cors());
+    this.express.use(
+      cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+      })
+    );
     this.express.use(json());
     this.express.use(urlencoded({ extended: true }));
     this.express.use((_req, res, next) => {
@@ -27,17 +33,24 @@ export class Server {
       res.header('Cross-Origin-Embedder-Policy', 'require-corp');
       next();
     });
+    this.express.use(cookieParser());
 
-    this.express.use('/', authRoutes);
+    this.express.use('/api/', authRoutes);
     // this.express.use('/api/', chatRoomRoutes);
 
     this.server = http.createServer(this.express);
 
     this.io = new SocketIOServer(this.server, {
-      cors: { origin: 'http://localhost:5173/', methods: ['GET', 'POST'] },
+      cors: {
+        origin: 'http://localhost:5173',
+        methods: ['GET', 'POST', 'OPTIONS'],
+        credentials: true,
+      },
     });
 
-    this.io.on('connection', handleConnection);
+    this.io.on('connection', socket => {
+      console.log(`User connected ${socket.id}`);
+    });
   }
 
   async listen(): Promise<void> {

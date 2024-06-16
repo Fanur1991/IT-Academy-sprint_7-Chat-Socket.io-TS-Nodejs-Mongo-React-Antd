@@ -5,12 +5,12 @@ import {
   ComparedPassword,
   HashPassword,
   ICreateUser,
-  IGetUser,
   ILoginUser,
+  IGetUser,
   IUser,
   Token,
   VerifiedToken,
-} from '../types.d';
+} from '../types/types';
 import qs from 'qs';
 import UserModel from '../models/UserModel';
 import axios from 'axios';
@@ -24,14 +24,14 @@ export const hashPassword = async (password: string): Promise<HashPassword> => {
   return await bcrypt.hash(password, salt);
 };
 
-const comparePasswords = async (
+export const comparePasswords = async (
   password: string,
   passwordHash: string
 ): Promise<ComparedPassword> => {
   return await bcrypt.compare(password, passwordHash);
 };
 
-const createToken = (userId: string): Token => {
+export const createToken = (userId: string): Token => {
   return jwt.sign({ userId }, JWT_SECRET, {
     expiresIn: '1d',
   });
@@ -63,6 +63,7 @@ export const createUser = async (userData: ICreateUser): Promise<IUser> => {
       username: newUser.username,
       email: newUser.email,
       room: newUser.room,
+      isGoogleAccount: false,
       token: createToken(newUser._id.toString()),
     };
   } catch (error: any) {
@@ -83,6 +84,20 @@ export const loginUser = async (userData: ILoginUser): Promise<IUser> => {
       throw new Error('User not found');
     }
 
+    if (foundUser.isGoogleAccount) {
+      return {
+        _id: foundUser._id.toString(),
+        username: foundUser.username,
+        email: foundUser.email,
+        room: foundUser.room,
+        token: createToken(foundUser._id.toString()),
+      };
+    }
+
+    if (!foundUser.passwordHash) {
+      return Promise.reject(new Error('No password set for user'));
+    }
+
     const comparedPassword = await comparePasswords(
       password,
       foundUser.passwordHash
@@ -97,7 +112,7 @@ export const loginUser = async (userData: ILoginUser): Promise<IUser> => {
         token: createToken(foundUser._id.toString()),
       };
     } else {
-      return Promise.reject(new Error('User not found'));
+      return Promise.reject(new Error('Incorrect password'));
     }
   } catch (error: any) {
     if (error.message) {
@@ -107,9 +122,9 @@ export const loginUser = async (userData: ILoginUser): Promise<IUser> => {
   }
 };
 
-export const getUserData = async (_id: string): Promise<IGetUser> => {
+export const getUserData = async (email: string): Promise<IGetUser> => {
   try {
-    const foundUser = await UserModel.findById(_id);
+    const foundUser = await UserModel.findOne({ email });
 
     if (!foundUser) {
       throw new Error('User not found');
@@ -120,6 +135,7 @@ export const getUserData = async (_id: string): Promise<IGetUser> => {
       username: foundUser.username,
       email: foundUser.email,
       room: foundUser.room,
+      isGoogleAccount: foundUser.isGoogleAccount,
     };
   } catch (error: any) {
     if (error.message) {
@@ -204,13 +220,58 @@ export const findAndUpdateUser = async (
   query: any,
   update: any,
   options: any = {}
-) => {
+): Promise<IUser> => {
   try {
-    // const hashedPassword = await hashPassword(update.password);
-    // update.passwordHash = hashedPassword;
-    return UserModel.findOneAndUpdate(query, update, options);
+    const updatedOptions = { ...options, new: true };
+    const result = await UserModel.findOneAndUpdate(
+      query,
+      update,
+      updatedOptions
+    ).lean();
+
+    if (!result) {
+      throw new Error('No document found with the given query');
+    }
+
+    return {
+      _id: result._id.toString(),
+      username: result.username,
+      email: result.email,
+      token: createToken(result._id.toString()),
+      room: result.room,
+      isGoogleAccount: result.isGoogleAccount,
+    };
   } catch (error) {
     console.error('Failed to update user:', error);
     throw new Error('Failed to update user');
   }
+};
+
+export const completeGoogleAuthentication = async (
+  code: string
+): Promise<IUser> => {
+  // Get the id_token and access_token with the code
+  const { id_token, access_token } = await getGoogleAuthTokens({ code });
+
+  // Get the user info with the id_token
+  const googleUser = await getGoogleUser({ id_token, access_token });
+
+  if (!googleUser) {
+    throw new Error('Google account is not verified');
+  }
+
+  const user = await findAndUpdateUser(
+    { email: googleUser.email },
+    {
+      $set: {
+        username: googleUser.name,
+        email: googleUser.email,
+        room: googleUser.locale,
+        isGoogleAccount: true,
+      },
+    },
+    { upsert: true, new: true }
+  );
+
+  return user;
 };

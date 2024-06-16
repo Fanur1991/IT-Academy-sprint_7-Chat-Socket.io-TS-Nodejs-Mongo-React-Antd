@@ -1,15 +1,13 @@
 import { Request, Response } from 'express';
-import { ICreateUser, ILoginUser } from '../types.d';
+import { ICreateUser, ILoginUser } from '../types/types';
 import {
   createUser,
   getUserData,
-  getGoogleAuthTokens,
   loginUser,
-  getGoogleUser,
-  findAndUpdateUser,
-  hashPassword,
+  completeGoogleAuthentication,
 } from '../services/authServices';
 import dotenv from 'dotenv';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -24,11 +22,20 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
+    const userData = JSON.stringify({
+      username: newUser.username,
+      email: newUser.email,
+      userId: newUser._id,
+      room: newUser.room,
+    });
+
+    res.cookie('userData', userData, { httpOnly: false });
+
     res.status(201).json({
       message: 'User created successfully',
       user: newUser,
     });
-  } catch (error: unknown) {
+  } catch (error: any) {
     const message = (error as Error).message || 'Internal Server Error';
     console.error('Register Error:', message);
     return res.status(500).json({ message });
@@ -46,12 +53,20 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
+    const userData = JSON.stringify({
+      username: user.username,
+      email: user.email,
+      userId: user._id,
+      room: user.room,
+    });
+
+    res.cookie('userData', userData, { httpOnly: false });
+
     res.status(200).json({
       message: 'Login successful',
       user,
     });
-  } catch (error: unknown) {
-    console.error('Error:', error);
+  } catch (error: any) {
     const message = (error as Error).message || 'Internal Server Error';
     console.error('Login Error:', message);
     return res.status(500).json({ message });
@@ -60,12 +75,17 @@ export const login = async (req: Request, res: Response) => {
 
 export const getMe = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id;
+    if (!req.cookies.userData) {
+      res.status(302).json({ message: 'Cookie not found' });
+      return;
+    }
 
-    const user = await getUserData(id);
+    const { email } = JSON.parse(req.cookies.userData);
+
+    const user = await getUserData(email);
 
     if (!user) {
-      res.status(400).json({ message: 'Failed to authentication' });
+      res.status(404).json({ message: 'User not found' });
       return;
     }
 
@@ -81,48 +101,16 @@ export const getMe = async (req: Request, res: Response) => {
 
 export const googleAuth = async (req: Request, res: Response) => {
   try {
-    // Get the code from qs
     const code = req.query.code as string;
 
-    // Get the id_token and access_token with the code
-    const { id_token, access_token } = await getGoogleAuthTokens({ code });
+    const user = await completeGoogleAuthentication(code);
 
-    // Get the user info with the id_token
-    const googleUser = await getGoogleUser({ id_token, access_token });
-
-    console.log('GOOGLE USER:', googleUser.email);
-
-    if (!googleUser) {
-      return res
-        .status(403)
-        .json({ message: 'Google account is not verified' });
-    }
-
-    // upsert the user
-    const hashedPassword = await hashPassword(googleUser.id);
-
-    const user = await findAndUpdateUser(
-      { email: googleUser.email },
-      {
-        $set: {
-          email: googleUser.email,
-          username: googleUser.name,
-          passwordHash: hashedPassword,
-        },
-      },
-      { upsert: true, new: true }
-    );
-
-    // add the user
-    const newUser = await createUser({
-      username: googleUser.name,
-      email: googleUser.email,
-      password: googleUser.id,
-      room: googleUser.locale,
+    const userData = JSON.stringify(user);
+    res.cookie('userData', userData, {
+      httpOnly: false,
     });
 
-    // redirect back to the client
-    res.redirect(`${process.env.CLIENT_URL}`);
+    res.redirect(301, 'http://localhost:5173');
   } catch (error: any) {
     console.error('Authentication error:', error);
     res

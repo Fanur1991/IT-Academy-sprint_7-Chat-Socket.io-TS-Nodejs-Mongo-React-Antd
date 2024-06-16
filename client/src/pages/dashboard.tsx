@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import { CommentOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme, Typography, Flex, Avatar, Button } from 'antd';
-import axios from 'axios';
+import Cookies from 'js-cookie';
+import Chat from '../components/Chat';
+import { useAuthContext } from '../context/AuthContext';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -21,17 +24,11 @@ const Dashboard: React.FC = () => {
     email: '',
     room: [],
   });
-  const [token, setToken] = useState<string>(
-    sessionStorage.getItem('token') || ''
-  );
-  const [userId, setUserId] = useState<string>(
-    sessionStorage.getItem('userId') || ''
-  );
-  const [room, setRoom] = useState<string>(
-    sessionStorage.getItem('room') || ''
-  );
+  const [room, setRoom] = useState<string>('default');
   const [avatarSeed, setAvatarSeed] = useState(() => Math.random().toFixed(2));
+  const { authUser } = useAuthContext();
   const navigate = useNavigate();
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -46,29 +43,13 @@ const Dashboard: React.FC = () => {
   ];
 
   useEffect(() => {
-    const fetchUserData = async (): Promise<void> => {
-      try {
-        const response = await axios.get(
-          `http://localhost:5555/api/users/${userId}`,
-          {
-            headers: {
-              Authorization: 'Bearer ' + token,
-            },
-          }
-        );
-
-        setUserData(response.data.user);
-      } catch (error) {
-        console.error('Failed to fetch room:', error);
-      }
-    };
-
-    if (!token) {
-      navigate('/login');
+    if (authUser) {
+      setUserData(authUser);
+      setRoom(authUser.room[0]);
+    } else {
+      navigate('/login', { replace: true });
     }
-
-    fetchUserData();
-  }, [token, navigate]);
+  }, [authUser]);
 
   const handleMenuClick = (item: any) => {
     navigate(item.path);
@@ -130,8 +111,9 @@ const Dashboard: React.FC = () => {
             type="link"
             style={{ marginRight: '64px', color: '#F5F5F5' }}
             onClick={() => {
+              Cookies.remove('userData');
               sessionStorage.clear();
-              navigate('/login', { replace: true });
+              navigate('/login');
             }}
           >
             Logout
@@ -154,18 +136,18 @@ const Dashboard: React.FC = () => {
               padding: 24,
               height: '100%',
               width: '75%',
-              background: colorBgContainer,
+              background: '#efdbff',
               borderRadius: borderRadiusLG,
             }}
           >
-            Content
+            {/* <Chat room={room} /> */}
           </div>
           <div
             style={{
               padding: 24,
               height: '100%',
               width: '20%',
-              background: colorBgContainer,
+              background: '#ffd6e7',
               borderRadius: borderRadiusLG,
             }}
           >

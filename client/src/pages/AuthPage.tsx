@@ -5,7 +5,6 @@ import {
   Button,
   Tabs,
   Typography,
-  ConfigProvider,
   message,
   Select,
   Divider,
@@ -18,9 +17,9 @@ import {
   EyeTwoTone,
   EyeInvisibleOutlined,
 } from '@ant-design/icons';
-import axios from 'axios';
 import getGoogleOauthUrl from '../utils/getGoogleUrl';
-import GoogleLoginButton from '../components/GoogleLoginButton';
+import Cookies from 'js-cookie';
+import { axiosInstance } from '../config/axios';
 
 const { TabPane } = Tabs;
 const { Title } = Typography;
@@ -52,26 +51,20 @@ const AuthPage: React.FC = () => {
 
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
-      const response = await axios.post('http://localhost:5555/login', {
-        email: values.email,
-        password: values.password,
-      });
-
-      navigate('/');
+      const response = await axiosInstance.post('/api/login', values);
 
       console.log('Login successful:', response.data.user);
-      sessionStorage.setItem('token', response.data.user.token);
-      sessionStorage.setItem('userId', response.data.user._id);
-      sessionStorage.setItem('room', response.data.user.room[0]);
+
+      sessionStorage.setItem('userData', JSON.stringify(response.data.user));
+
+      Cookies.set('userData', JSON.stringify(response.data.user));
 
       message.success('Login successful');
+
+      navigate('/');
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log('Login error:', error.response.data);
-        message.error(error.response.data.message);
-      } else {
-        console.log('Unexpected error:', error);
-      }
+      console.error('Login error:', error);
+      message.error('Failed to login');
     }
   };
 
@@ -82,27 +75,23 @@ const AuthPage: React.FC = () => {
     password: string;
   }) => {
     try {
-      const response = await axios.post('http://localhost:5555/register', {
-        username: values.username,
-        email: values.email,
-        room: values.room,
-        password: values.password,
-      });
-      navigate('/');
+      const response = await axiosInstance.post('/api/register', values);
 
       console.log('Registration successful:', response.data);
-      sessionStorage.setItem('token', response.data.user.token);
-      sessionStorage.setItem('userId', response.data.user._id);
-      sessionStorage.setItem('room', values.room);
+
+      sessionStorage.setItem(
+        'userData',
+        JSON.stringify({ ...response.data.user, room: values.room })
+      );
+
+      Cookies.set('userData', JSON.stringify(response.data.user));
 
       message.success('Registration successful');
+
+      navigate('/');
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log('Registration error:', error.response.data);
-        message.error(error.response.data.message);
-      } else {
-        console.log('Unexpected error:', error);
-      }
+      console.error('Registration error:', error);
+      message.error('Failed to register');
     }
   };
 
@@ -121,129 +110,124 @@ const AuthPage: React.FC = () => {
         </Title>
         <img width={35} height={35} src="../../public/chatting.svg" />
       </Flex>
-      <ConfigProvider
-        theme={{
-          components: {
-            Tabs: {
-              itemSelectedColor: '#B37FEB',
-              inkBarColor: '#B37FEB',
-            },
-          },
-        }}
+      <Tabs
+        activeKey={activeTab}
+        defaultActiveKey="login"
+        onChange={key => setActiveTab(key)}
       >
-        <Tabs
-          activeKey={activeTab}
-          defaultActiveKey="login"
-          onChange={key => setActiveTab(key)}
-        >
-          <TabPane tab="Login" key="login">
-            <Form
-              name="login_form"
-              initialValues={{ remember: true }}
-              onFinish={handleLogin}
+        <TabPane tab="Login" key="login">
+          <Form
+            name="login_form"
+            initialValues={{ remember: true }}
+            onFinish={handleLogin}
+          >
+            <Form.Item
+              name="email"
+              rules={[{ required: true, message: 'Please input your Email!' }]}
             >
-              <Form.Item
-                name="email"
-                rules={[
-                  { required: true, message: 'Please input your Email!' },
-                ]}
-              >
-                <Input
-                  prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Email"
-                />
-              </Form.Item>
-              <Form.Item
-                name="password"
-                rules={[
-                  { required: true, message: 'Please input your Password!' },
-                ]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined className="site-form-item-icon" />}
-                  type="password"
-                  placeholder="Password"
-                  iconRender={visible =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                  }
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  style={{ width: '100%', height: 55 }}
-                >
-                  Log in 🚀
-                </Button>
-              </Form.Item>
-            </Form>
-          </TabPane>
-          <TabPane tab="Register" key="register">
-            <Form name="register_form" onFinish={handleRegister}>
-              <Form.Item name="username">
-                <Input
-                  prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Username"
-                />
-              </Form.Item>
-              <Form.Item
-                name="email"
-                rules={[
-                  { required: true, message: 'Please input your Email!' },
-                ]}
-              >
-                <Input
-                  prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Email"
-                />
-              </Form.Item>
-              <Form.Item
-                name="room"
-                rules={[{ required: true, message: 'Please input!' }]}
-              >
-                <Select allowClear showSearch placeholder="Select room">
-                  {rooms.map(room => (
-                    <Option key={room}>{room}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name="password"
-                rules={[
-                  { required: true, message: 'Please input your Password!' },
-                ]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined className="site-form-item-icon" />}
-                  type="password"
-                  placeholder="Password"
-                  iconRender={visible =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                  }
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  style={{ width: '100%', height: 55 }}
-                >
-                  Register 🚀
-                </Button>
-              </Form.Item>
-              <Divider
-                children="Or with google account"
-                type="horizontal"
-                orientation="center"
+              <Input
+                prefix={<UserOutlined className="site-form-item-icon" />}
+                placeholder="Email"
               />
-              <Form.Item>
-                <GoogleLoginButton href={getGoogleOauthUrl()} />
-              </Form.Item>
-            </Form>
-          </TabPane>
-        </Tabs>
-      </ConfigProvider>
+            </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                { required: true, message: 'Please input your Password!' },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined className="site-form-item-icon" />}
+                type="password"
+                placeholder="Password"
+                iconRender={visible =>
+                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                }
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                style={{ width: '100%', height: 55 }}
+              >
+                Log in 🚀
+              </Button>
+            </Form.Item>
+          </Form>
+        </TabPane>
+        <TabPane tab="Register" key="register">
+          <Form name="register_form" onFinish={handleRegister}>
+            <Form.Item name="username">
+              <Input
+                prefix={<UserOutlined className="site-form-item-icon" />}
+                placeholder="Username"
+              />
+            </Form.Item>
+            <Form.Item
+              name="email"
+              rules={[{ required: true, message: 'Please input your Email!' }]}
+            >
+              <Input
+                prefix={<UserOutlined className="site-form-item-icon" />}
+                placeholder="Email"
+              />
+            </Form.Item>
+            <Form.Item
+              name="room"
+              rules={[{ required: true, message: 'Please input!' }]}
+            >
+              <Select allowClear showSearch placeholder="Select room">
+                {rooms.map(room => (
+                  <Option key={room}>{room}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                { required: true, message: 'Please input your Password!' },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined className="site-form-item-icon" />}
+                type="password"
+                placeholder="Password"
+                iconRender={visible =>
+                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                }
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                style={{ width: '100%', height: 55, color: 'white' }}
+              >
+                Sign up 🚀
+              </Button>
+            </Form.Item>
+            <Divider
+              children="Or with google account"
+              type="horizontal"
+              orientation="center"
+            />
+            <Form.Item>
+              <Button
+                href={getGoogleOauthUrl()}
+                style={{ width: '100%', height: '55px' }}
+              >
+                <img
+                  style={{ width: 40, height: 40 }}
+                  src="../../public/google_icon.svg"
+                  alt="Google Login"
+                />
+                Sign in with Google
+              </Button>
+            </Form.Item>
+          </Form>
+        </TabPane>
+      </Tabs>
     </div>
   );
 };
