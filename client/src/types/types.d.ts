@@ -5,7 +5,7 @@ export interface IUser {
   _id: string;
   username: string;
   email: string;
-  room: string[];
+  room: string;
   isGoogleAccount?: boolean;
   token?: string;
 }

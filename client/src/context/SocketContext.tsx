@@ -9,12 +9,16 @@ export const useSocketContext = () => {
   const context = useContext(SocketContext);
 
   if (!context) {
-    throw new Error('useSocketContext must be used within a SocketContextProvider');
+    throw new Error(
+      'useSocketContext must be used within a SocketContextProvider'
+    );
   }
   return context;
 };
 
-export const SocketContextProvider: React.FC<IAuthProviderProps> = ({ children }) => {
+export const SocketContextProvider: React.FC<IAuthProviderProps> = ({
+  children,
+}) => {
   const { authUser } = useAuthContext();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
@@ -23,8 +27,8 @@ export const SocketContextProvider: React.FC<IAuthProviderProps> = ({ children }
     if (authUser && authUser._id) {
       const socket = io('http://localhost:5555', {
         query: {
-          userId: authUser._id
-        }
+          userId: authUser._id,
+        },
       });
 
       setSocket(socket);
@@ -35,7 +39,6 @@ export const SocketContextProvider: React.FC<IAuthProviderProps> = ({ children }
 
       return () => {
         socket.close();
-		
       };
     } else {
       if (socket) {
@@ -45,5 +48,9 @@ export const SocketContextProvider: React.FC<IAuthProviderProps> = ({ children }
     }
   }, [authUser]);
 
-  return <SocketContext.Provider value={{ socket, onlineUsers }}>{children}</SocketContext.Provider>;
+  return (
+    <SocketContext.Provider value={{ socket, onlineUsers }}>
+      {children}
+    </SocketContext.Provider>
+  );
 };

@@ -13,6 +13,11 @@ import { useSocketContext } from './context/SocketContext';
 
 const App: React.FC = () => {
   const { authUser } = useAuthContext();
+  const { socket } = useSocketContext();
+
+  // console.log('AUTHUSER', authUser);
+  // console.log('SOCKET', socket);
+  
 
   // const router = createBrowserRouter([
   //   {

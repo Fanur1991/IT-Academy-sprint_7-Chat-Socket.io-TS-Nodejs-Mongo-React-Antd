@@ -5,7 +5,7 @@ export interface IUser extends mongoose.Document {
   username: string;
   passwordHash: string;
   email: string;
-  room: string[];
+  room: string;
   isGoogleAccount: boolean;
   lastLogin: Date;
   createdAt: Date;
@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
   passwordHash: { type: String },
   email: { type: String, required: true, unique: true },
-  room: [{ type: String, required: true }],
+  room: { type: String, required: true },
   isGoogleAccount: { type: Boolean, default: false },
   lastLogin: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },

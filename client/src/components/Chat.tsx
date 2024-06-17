@@ -7,68 +7,73 @@ import { IUser, IChatProps, IMessage } from '../types/types';
 
 const Chat: React.FC<IChatProps> = ({ room }) => {
   const [socket, setSocket] = useState<any>(null);
+  const socketRef = useRef(null);
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState<string>('');
   const { authUser } = useAuthContext();
   const messageEndRef = useRef<HTMLDivElement | null>(null);
-  const [userData, setUserData] = useState<IUser>({
-    _id: '',
-    username: '',
-    email: '',
-    room: [],
-  });
+  // const [userData, setUserData] = useState<IUser>({
+  //   _id: '',
+  //   username: '',
+  //   email: '',
+  //   room: '',
+  // });
 
-  console.log('Messages: ', messages);
+  // console.log('authUser', authUser);
+
+  // console.log('Messages: ', messages);
+  // console.log('userDAta', authUser);
+
+  // useEffect(() => {
+  //   if (authUser) {
+  //     setUserData(authUser);
+  //   }
+  // }, [authUser]);
 
   useEffect(() => {
-    console.log('Room on mount:', room);
-  }, []);
+    if (!authUser || !authUser._id) return;
 
-  useEffect(() => {
-    if (authUser) {
-      setUserData(authUser);
-    }
-  }, [authUser]);
-
-  useEffect(() => {
-    const socket = io('http://localhost:5555', {
-      withCredentials: true,
-      transports: ['websocket'],
-    });
-    setSocket(socket);
-
-    if (socket) {
-      socket.on('room_history', (messages: IMessage[]) => {
-        setMessages(messages);
+    if (!socketRef.current) {
+      const newSocket = io('http://localhost:5555', {
+        withCredentials: true,
+        transports: ['websocket'],
+        query: { userId: authUser._id },
       });
 
-      socket.on('receive_message', (message: IMessage) => {
+      setSocket(newSocket);
+
+      newSocket.on('room_history', (receivedMessages: IMessage[]) => {
+        setMessages(receivedMessages);
+      });
+
+      newSocket.on('receive_message', (message: IMessage) => {
         console.log('Message received: ', message);
         setMessages(prevMessages => [...prevMessages, message]);
       });
+
+      newSocket.emit('join_room', room);
+
+      return () => {
+        newSocket.close();
+      };
     }
-    return () => {
-      socket.close();
-    };
-  }, []);
+  }, [authUser, room]);
 
   useEffect(() => {
-    messageEndRef.current!.scrollIntoView({ behavior: 'smooth' });
+    if (messageEndRef.current) {
+      messageEndRef.current!.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   const sendMessage = () => {
     if (inputMessage && socket) {
-      const effectiveRoom = room || 'default';
-      console.log('Sending message: ', {
-        room: effectiveRoom,
-        message: inputMessage,
-        user: userData.username,
-      });
+      console.log('Sending message: ', messages);
 
       socket.emit('send_message', {
         text: inputMessage,
-        senderId: userData._id,
-        room: room || 'default',
+        senderId: authUser?._id,
+        username: authUser?.username,
+        room,
       });
 
       setInputMessage('');

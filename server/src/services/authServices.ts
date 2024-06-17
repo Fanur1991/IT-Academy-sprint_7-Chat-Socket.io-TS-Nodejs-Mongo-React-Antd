@@ -260,13 +260,15 @@ export const completeGoogleAuthentication = async (
     throw new Error('Google account is not verified');
   }
 
+  const room = 'Default';
+
   const user = await findAndUpdateUser(
     { email: googleUser.email },
     {
       $set: {
         username: googleUser.name,
         email: googleUser.email,
-        room: googleUser.locale,
+        room,
         isGoogleAccount: true,
       },
     },

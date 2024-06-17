@@ -13,7 +13,7 @@ type UserData = {
   _id: string;
   username: string;
   email: string;
-  room: string[];
+  room: string;
 };
 
 const Dashboard: React.FC = () => {
@@ -21,9 +21,9 @@ const Dashboard: React.FC = () => {
     _id: '',
     username: '',
     email: '',
-    room: [],
+    room: '',
   });
-  const [room, setRoom] = useState<string>('default');
+  const [room, setRoom] = useState<string>('');
   const [avatarSeed, setAvatarSeed] = useState(() => Math.random().toFixed(2));
   const { authUser } = useAuthContext();
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (authUser) {
       setUserData(authUser);
-      setRoom(authUser.room[0]);
+      setRoom(authUser.room);
     } else {
       navigate('/login', { replace: true });
     }
