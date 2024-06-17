@@ -26,6 +26,8 @@ export const SocketContextProvider: React.FC<IAuthProviderProps> = ({
   useEffect(() => {
     if (authUser && authUser._id) {
       const socket = io('http://localhost:5555', {
+        withCredentials: true,
+        transports: ['websocket'],
         query: {
           userId: authUser._id,
         },

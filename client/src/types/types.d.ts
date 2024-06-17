@@ -31,4 +31,7 @@ export interface IChatProps {
 export interface IMessage {
   username: string;
   text: string;
+  senderId: string;
+  room: string;
+  createdAt: Date | string;
 }

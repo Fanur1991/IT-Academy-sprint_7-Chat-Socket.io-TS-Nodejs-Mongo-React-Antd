@@ -44,7 +44,7 @@ export class Server {
     this.io = new SocketIOServer(this.server, {
       cors: {
         origin: 'http://localhost:5173',
-        methods: ['GET', 'POST'],
+        methods: ['GET', 'POST', 'OPTIONS'],
         credentials: true,
       },
     });

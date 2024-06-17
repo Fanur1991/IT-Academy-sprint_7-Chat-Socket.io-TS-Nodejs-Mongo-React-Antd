@@ -6,6 +6,7 @@ import mongoose, { Types } from 'mongoose';
 function handleConnection(socket: Socket, io: SocketIOServer) {
   console.log(`User connected ${socket.id}`);
 
+  // * Get user ID
   const userId = socket.handshake.query.userId;
   if (Array.isArray(userId)) {
     socket.userId = new Types.ObjectId(userId[0]);
@@ -13,6 +14,7 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
     socket.userId = new Types.ObjectId(userId);
   }
 
+  // * Join the room
   socket.on('join_room', async (room: string) => {
     socket.join(room);
     console.log(`User ${socket.id} joined room ${room}`);
@@ -40,8 +42,6 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
 
       const messages = await MessageModel.find({ chatRoomId: chatRoom._id });
 
-      console.log(messages);
-
       socket.emit('room_history', messages);
     } catch (error) {
       console.error('Error handling room join:', error);
@@ -49,6 +49,7 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
     }
   });
 
+  // * Send message
   socket.on('send_message', async ({ username, text, senderId, room }) => {
     try {
       console.log('Received message data:', { username, text, senderId, room });
@@ -87,6 +88,7 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
     }
   });
 
+  // * Disconnect
   socket.on('disconnect', () => {
     console.log(`User disconnected ${socket.id}`);
   });
