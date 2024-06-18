@@ -4,11 +4,11 @@ import { Input, Button, Flex, Card, List, Typography } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { useAuthContext } from '../context/AuthContext';
 import { useSocketContext } from '../context/SocketContext';
-import { IChatProps, IMessage } from '../types/types';
+import { IMessage } from '../types/types';
 
 const { Text } = Typography;
 
-const Chat: React.FC<IChatProps> = ({ room }) => {
+const Chat: React.FC = () => {
   // const [socket, setSocket] = useState<any>(null);
   // const socketRef = useRef(socket);
   // const [messages, setMessages] = useState<IMessage[]>([]);
@@ -19,11 +19,14 @@ const Chat: React.FC<IChatProps> = ({ room }) => {
 
   const { authUser } = useAuthContext();
   const { socket } = useSocketContext();
+  const { onlineUsers } = useSocketContext();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState<string>('');
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   console.log('socket', socket);
+  console.log('onlineUsers', onlineUsers);
+  
 
   // useEffect(() => {
   //   if (!authUser || !authUser._id) return;
@@ -76,7 +79,7 @@ const Chat: React.FC<IChatProps> = ({ room }) => {
         setMessages(prevMessages => [...prevMessages, message]);
       });
 
-      socket.emit('join_room', room);
+      socket.emit('join_room', authUser?.room);
 
       return () => {
         socket.off('connect');
@@ -84,7 +87,7 @@ const Chat: React.FC<IChatProps> = ({ room }) => {
         socket.off('receive_message');
       };
     }
-  }, [socket, room]);
+  }, [socket, authUser?.room]);
 
   // useEffect(() => {
   //   if (messageEndRef.current) {
@@ -118,13 +121,13 @@ const Chat: React.FC<IChatProps> = ({ room }) => {
         text: inputMessage,
         senderId: authUser._id,
         username: authUser.username,
-        room,
+        room: authUser.room,
         createdAt: new Date().toISOString(),
       };
 
       socket.emit('send_message', messageData);
 
-      setMessages(prevMessages => [...prevMessages, messageData]);
+      // setMessages(prevMessages => [...prevMessages, messageData]);
 
       setInputMessage('');
     }
@@ -164,6 +167,7 @@ const Chat: React.FC<IChatProps> = ({ room }) => {
               }}
             >
               <Card
+                key={index}
                 style={{
                   maxWidth: '100%',
                   borderRadius: '10px',

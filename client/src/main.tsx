@@ -49,7 +49,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           Card: {
             paddingLG: 5,
             colorBgContainer: '#f0f2f5',
-          }
+          },
         },
       }}
     >

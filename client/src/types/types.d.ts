@@ -24,10 +24,6 @@ export interface IAuthProviderProps {
   children: ReactNode;
 }
 
-export interface IChatProps {
-  room: string;
-}
-
 export interface IMessage {
   username: string;
   text: string;

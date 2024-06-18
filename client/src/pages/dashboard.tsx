@@ -5,6 +5,7 @@ import { Layout, Menu, theme, Typography, Flex, Avatar, Button } from 'antd';
 import Cookies from 'js-cookie';
 import Chat from '../components/Chat';
 import { useAuthContext } from '../context/AuthContext';
+import UsersInfo from '../components/UsersInfo';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Text } = Typography;
@@ -139,7 +140,7 @@ const Dashboard: React.FC = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            <Chat room={room} />
+            <Chat />
           </div>
           <div
             style={{
@@ -150,7 +151,7 @@ const Dashboard: React.FC = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            sider
+            <UsersInfo />
           </div>
         </Content>
         <Footer style={{ overflow: 'initial', textAlign: 'center' }}>
