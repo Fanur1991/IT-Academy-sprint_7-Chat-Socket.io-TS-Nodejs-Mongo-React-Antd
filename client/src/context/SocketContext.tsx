@@ -39,6 +39,10 @@ export const SocketContextProvider: React.FC<IAuthProviderProps> = ({
         setOnlineUsers(users);
       });
 
+      socket.on('disconnect', () => {
+        setOnlineUsers(prev => prev.filter(id => id !== authUser._id));
+      });
+
       return () => {
         socket.close();
       };

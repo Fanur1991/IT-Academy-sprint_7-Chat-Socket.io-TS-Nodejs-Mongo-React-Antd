@@ -7,8 +7,9 @@ import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { handleConnection } from '../handlers/chatHandlers';
 import authRoutes from '../routes/authRoutes';
-import cookieParser from 'cookie-parser';
+import userRoutes from '../routes/userRoutes';
 // import chatRoomRoutes from '../routes/chatRoomRoutes';
+import cookieParser from 'cookie-parser';
 
 export class Server {
   private readonly express: express.Express;
@@ -36,7 +37,8 @@ export class Server {
     });
     this.express.use(cookieParser());
 
-    this.express.use('/api/', authRoutes);
+    this.express.use('/api', authRoutes);
+    this.express.use('/api', userRoutes);
     // this.express.use('/api/', chatRoomRoutes);
 
     this.server = http.createServer(this.express);

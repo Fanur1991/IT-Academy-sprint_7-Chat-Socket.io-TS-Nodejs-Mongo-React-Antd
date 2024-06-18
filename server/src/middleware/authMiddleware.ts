@@ -8,20 +8,25 @@ export const authMiddleware = async (
 ) => {
   try {
     const authHeader = req.header('Authorization');
-    if (!authHeader) {
-      res.status(401).json({ message: 'Authorization header is missing' });
+    const userData = req.cookies.userData;
+
+    let token;
+
+    if (authHeader) {
+      const parts = authHeader.split(' ');
+      if (parts.length !== 2 || parts[0] !== 'Bearer') {
+        res
+          .status(401)
+          .json({ message: 'Authorization token must be Bearer token' });
+        return;
+      }
+      token = parts[1];
+    } else if (userData) {
+      token = JSON.parse(userData).token;
+    } else {
+      res.status(401).json({ message: 'Error: Authorization token not found' });
       return;
     }
-
-    const parts = authHeader.split(' ');
-    if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      res
-        .status(401)
-        .json({ message: 'Authorization token must be Bearer token' });
-      return;
-    }
-
-    const token = parts[1];
     const decodedToken = (await verifyToken(token)) as {
       _id: string;
     };

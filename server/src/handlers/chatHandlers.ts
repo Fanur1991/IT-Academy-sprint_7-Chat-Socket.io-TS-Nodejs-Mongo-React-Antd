@@ -3,11 +3,20 @@ import MessageModel from '../models/MessageModel';
 import ChatModel, { IChat } from '../models/ChatModel';
 import mongoose, { Types } from 'mongoose';
 
+const onlineUsers: { [key: string]: string } = {};
+
 function handleConnection(socket: Socket, io: SocketIOServer) {
   console.log(`User connected ${socket.id}`);
 
   // * Get user ID
-  const userId = socket.handshake.query.userId;
+  const userId = socket.handshake.query.userId as string | string[] | undefined;
+
+  if (userId) {
+    const userIdString = Array.isArray(userId) ? userId[0] : userId;
+    onlineUsers[userIdString] = socket.id;
+    io.emit('getOnlineUsers', Object.keys(onlineUsers));
+  }
+
   if (Array.isArray(userId)) {
     socket.userId = new Types.ObjectId(userId[0]);
   } else {
@@ -91,6 +100,13 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
   // * Disconnect
   socket.on('disconnect', () => {
     console.log(`User disconnected ${socket.id}`);
+
+    if (userId) {
+      const userIdString = Array.isArray(userId) ? userId[0] : userId;
+      delete onlineUsers[userIdString];
+    }
+
+    io.emit('getOnlineUsers', Object.keys(onlineUsers));
   });
 }
 

@@ -26,7 +26,7 @@ export interface IUser {
   _id: string;
   username: string;
   email: string;
-  token: string;
+  token?: string;
   room: string;
   isGoogleAccount?: boolean;
 }

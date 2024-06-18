@@ -1,13 +1,53 @@
 import { Flex, List, Typography } from 'antd';
 import { GoDotFill } from 'react-icons/go';
 import { useAuthContext } from '../context/AuthContext';
+import { useSocketContext } from '../context/SocketContext';
+import { useEffect, useState } from 'react';
+import { axiosInstance } from '../config/axios';
+import { IUser } from '../types/types';
 
 const { Text } = Typography;
 
 const UsersInfo: React.FC = () => {
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const { authUser } = useAuthContext();
+  const { socket } = useSocketContext();
 
-  const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
+  useEffect(() => {
+    getAllUsers();
+
+    if (socket) {
+      socket.on('getOnlineUsers', (users: string[]) => {
+        setOnlineUsers(users);
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('getOnlineUsers');
+      }
+    };
+  }, [socket]);
+
+  const getAllUsers = async () => {
+    try {
+      const response = await axiosInstance.get('/api/users', {
+        withCredentials: true,
+      });
+
+      if (Array.isArray(response.data)) {
+        setUsers(response.data);
+      } else {
+        console.error('Expected an array of users');
+      }
+    } catch (error: any) {}
+  };
+
+  const onlineUsernames = users.filter(user => onlineUsers.includes(user._id));
+  const offlineUsernames = users.filter(
+    user => !onlineUsers.includes(user._id)
+  );
 
   return (
     <Flex
@@ -31,10 +71,10 @@ const UsersInfo: React.FC = () => {
       </Flex>
       <List
         style={{ width: '100%' }}
-        dataSource={users}
+        dataSource={onlineUsernames}
         renderItem={item => (
           <Flex justify="center" align="center" vertical>
-            <Text style={{ fontSize: 12 }}>{item}</Text>
+            <Text style={{ fontSize: 12 }}>{item.username}</Text>
           </Flex>
         )}
       />
@@ -48,10 +88,12 @@ const UsersInfo: React.FC = () => {
       </Flex>
       <List
         style={{ width: '100%' }}
-        dataSource={users}
+        dataSource={offlineUsernames}
         renderItem={item => (
           <Flex justify="center" align="center" vertical>
-            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>{item}</Text>
+            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>
+              {item.username}
+            </Text>
           </Flex>
         )}
       />
