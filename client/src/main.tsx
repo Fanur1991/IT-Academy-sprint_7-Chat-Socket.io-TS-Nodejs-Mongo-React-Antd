@@ -47,7 +47,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             inkBarColor: '#B37FEB',
           },
           Card: {
-            paddingLG: 5,
+            paddingLG: 3,
             colorBgContainer: '#f0f2f5',
           },
         },

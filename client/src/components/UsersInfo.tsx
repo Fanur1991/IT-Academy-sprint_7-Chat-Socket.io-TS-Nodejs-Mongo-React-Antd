@@ -1,4 +1,4 @@
-import { Flex, List, Typography } from 'antd';
+import { Flex, List, Typography, Tag } from 'antd';
 import { GoDotFill } from 'react-icons/go';
 import { useAuthContext } from '../context/AuthContext';
 import { useSocketContext } from '../context/SocketContext';
@@ -61,6 +61,14 @@ const UsersInfo: React.FC = () => {
       align="start"
       vertical
     >
+      <Flex style={{ margin: '0 auto' }} justify="center" align="center">
+        <Text style={{ fontSize: 12, color: '#8c8c8c' }}>
+          Room:{' '}
+          <Text style={{ fontSize: 12, fontWeight: 450 }}>
+            {authUser?.room}
+          </Text>
+        </Text>
+      </Flex>
       <Flex justify="center" align="center">
         <GoDotFill
           style={{ padding: 0, margin: 0 }}
@@ -73,8 +81,10 @@ const UsersInfo: React.FC = () => {
         style={{ width: '100%' }}
         dataSource={onlineUsernames}
         renderItem={item => (
-          <Flex justify="center" align="center" vertical>
-            <Text style={{ fontSize: 12 }}>{item.username}</Text>
+          <Flex justify="center" align="start" vertical>
+            <Tag color="success" style={{ marginLeft: 15, fontSize: 12 }}>
+              {item.username}
+            </Tag>
           </Flex>
         )}
       />
@@ -82,7 +92,7 @@ const UsersInfo: React.FC = () => {
         <GoDotFill
           style={{ padding: 0, margin: 0 }}
           size={14}
-          color="#a8071a  "
+          color="#a8071a"
         />
         <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Offline users:</Text>
       </Flex>
@@ -90,10 +100,10 @@ const UsersInfo: React.FC = () => {
         style={{ width: '100%' }}
         dataSource={offlineUsernames}
         renderItem={item => (
-          <Flex justify="center" align="center" vertical>
-            <Text style={{ fontSize: 12, color: '#8c8c8c' }}>
+          <Flex justify="center" align="start" vertical>
+            <Tag color="error" style={{ marginLeft: 15, fontSize: 12 }}>
               {item.username}
-            </Text>
+            </Tag>
           </Flex>
         )}
       />

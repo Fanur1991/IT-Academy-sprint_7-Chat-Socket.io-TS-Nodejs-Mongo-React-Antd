@@ -24,7 +24,7 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
   }
 
   // * Join the room
-  socket.on('join_room', async (room: string) => {
+  socket.on('joinRoom', async (room: string) => {
     socket.join(room);
     console.log(`User ${socket.id} joined room ${room}`);
 
@@ -51,7 +51,7 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
 
       const messages = await MessageModel.find({ chatRoomId: chatRoom._id });
 
-      socket.emit('room_history', messages);
+      socket.emit('roomHistory', messages);
     } catch (error) {
       console.error('Error handling room join:', error);
       socket.emit('error', 'Failed to handle room join');
@@ -59,10 +59,8 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
   });
 
   // * Send message
-  socket.on('send_message', async ({ username, text, senderId, room }) => {
+  socket.on('sendMessage', async ({ username, text, senderId, room }) => {
     try {
-      console.log('Received message data:', { username, text, senderId, room });
-
       const chatRoom = (await ChatModel.findOne({ name: room })) as IChat & {
         _id: mongoose.Types.ObjectId;
       };
@@ -84,11 +82,10 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
 
       await chatRoom.save();
 
-      console.log('Chat room updated with new message:', chatRoom);
-
-      io.to(chatRoom._id.toString()).emit('receive_message', {
+      io.to(room).emit('receiveMessage', {
         text: message.text,
         senderId: message.senderId,
+        username: message.username,
         room: chatRoom._id.toString(),
         createdAt: message.createdAt,
       });

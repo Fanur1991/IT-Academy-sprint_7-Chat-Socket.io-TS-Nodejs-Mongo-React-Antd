@@ -1,4 +1,3 @@
-import { io } from 'socket.io-client';
 import React, { useState, useEffect, useRef } from 'react';
 import { Input, Button, Flex, Card, List, Typography } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
@@ -18,15 +17,13 @@ const Chat: React.FC = () => {
   // const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const { authUser } = useAuthContext();
-  const { socket } = useSocketContext();
-  const { onlineUsers } = useSocketContext();
+  const { socket, onlineUsers } = useSocketContext();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState<string>('');
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  console.log('socket', socket);
-  console.log('onlineUsers', onlineUsers);
-  
+  // console.log('socket', socket);
+  // console.log('onlineUsers', onlineUsers);
 
   // useEffect(() => {
   //   if (!authUser || !authUser._id) return;
@@ -46,16 +43,16 @@ const Chat: React.FC = () => {
 
   //     socketRef.current = newSocket;
 
-  //     newSocket.on('room_history', (receivedMessages: IMessage[]) => {
+  //     newSocket.on('roomHistory', (receivedMessages: IMessage[]) => {
   //       setMessages(receivedMessages);
   //     });
 
-  //     newSocket.on('receive_message', (message: IMessage) => {
+  //     newSocket.on('receiveMessage', (message: IMessage) => {
   //       console.log('Message received: ', message);
   //       setMessages(prevMessages => [...prevMessages, message]);
   //     });
 
-  //     newSocket.emit('join_room', room);
+  //     newSocket.emit('joinRoom', room);
 
   //     return () => {
   //       newSocket.close();
@@ -70,21 +67,21 @@ const Chat: React.FC = () => {
         console.log('Socket connected:', socket.id);
       });
 
-      socket.on('room_history', (receivedMessages: IMessage[]) => {
+      socket.on('roomHistory', (receivedMessages: IMessage[]) => {
         setMessages(receivedMessages);
       });
 
-      socket.on('receive_message', (message: IMessage) => {
+      socket.on('receiveMessage', (message: IMessage) => {
         console.log('Message received: ', message);
         setMessages(prevMessages => [...prevMessages, message]);
       });
 
-      socket.emit('join_room', authUser?.room);
+      socket.emit('joinRoom', authUser?.room);
 
       return () => {
         socket.off('connect');
-        socket.off('room_history');
-        socket.off('receive_message');
+        socket.off('roomHistory');
+        socket.off('receiveMessage');
       };
     }
   }, [socket, authUser?.room]);
@@ -125,9 +122,7 @@ const Chat: React.FC = () => {
         createdAt: new Date().toISOString(),
       };
 
-      socket.emit('send_message', messageData);
-
-      // setMessages(prevMessages => [...prevMessages, messageData]);
+      socket.emit('sendMessage', messageData);
 
       setInputMessage('');
     }
@@ -144,7 +139,6 @@ const Chat: React.FC = () => {
         width: '100%',
         height: '100%',
         borderRadius: '10px',
-        // overflow: 'hidden'
       }}
     >
       <div
@@ -173,6 +167,7 @@ const Chat: React.FC = () => {
                   borderRadius: '10px',
                   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                   border: 'none',
+                  padding: '0 12px',
                 }}
               >
                 <Text

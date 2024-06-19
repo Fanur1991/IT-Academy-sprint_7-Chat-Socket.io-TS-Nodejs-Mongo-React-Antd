@@ -1,27 +1,21 @@
-import { Server } from './app/Server';
+import { startServer } from './app/Server';
 import mongoConnect from './config/mongoConfig';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export class App {
-  server?: Server;
-  mongo?: any;
+const PORT = process.env.PORT || '5555';
 
-  async start(): Promise<void> {
-    const port = process.env.PORT || '8000';
-    this.server = new Server(port);
-
+const startApp = async (): Promise<void> => {
+  try {
     await mongoConnect();
-    await this.server.listen();
+    await startServer(PORT);
+  } catch (e) {
+    process.exit(1);
   }
-}
+};
 
-try {
-  void new App().start();
-} catch (e) {
-  process.exit(1);
-}
+startApp();
 
 process.on('uncaughtException', () => {
   process.exit(1);
