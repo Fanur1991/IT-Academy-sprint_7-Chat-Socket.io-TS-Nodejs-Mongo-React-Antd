@@ -1,11 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommentOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Layout, Menu, theme, Typography, Flex, Avatar, Button } from 'antd';
+import {
+  Layout,
+  Menu,
+  theme,
+  Typography,
+  Flex,
+  Avatar,
+  Button,
+  message,
+} from 'antd';
+import type { MenuProps } from 'antd';
 import Cookies from 'js-cookie';
 import Chat from '../components/Chat';
 import { useAuthContext } from '../context/AuthContext';
 import UsersInfo from '../components/UsersInfo';
+import { rooms } from './AuthPage';
+import { axiosInstance } from '../config/axios';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Text } = Typography;
@@ -33,12 +45,42 @@ const Dashboard: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const items = [
+  const handleMenuClick: MenuProps['onClick'] = async (e: any) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/rooms`,
+        { room: rooms[parseInt(e.key)] },
+        {
+          headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.log('Room changed successfully:', response.data.room);
+
+      sessionStorage.setItem('userData', JSON.stringify(response.data));
+      Cookies.set('userData', JSON.stringify(response.data));
+
+      setRoom(response.data.room);
+
+      message.success('Room changed successfully');
+    } catch (error: any) {
+      console.error('Failed to change room:', error);
+      message.error('Failed to change room');
+    }
+  };
+
+  const items: MenuProps['items'] = [
     {
-      key: '1',
+      key: 'First',
       icon: <CommentOutlined />,
       label: room,
-      path: '/',
+      children: rooms.map((room, index) => ({
+        key: index.toString(),
+        label: room,
+      })),
     },
   ];
 
@@ -49,11 +91,7 @@ const Dashboard: React.FC = () => {
     } else {
       navigate('/login', { replace: true });
     }
-  }, [authUser]);
-
-  const handleMenuClick = (item: any) => {
-    navigate(item.path);
-  };
+  }, [authUser, setRoom]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -86,15 +124,13 @@ const Dashboard: React.FC = () => {
         </div>
         <Menu
           style={{
-            backgroundImage: 'linear-gradient(180deg, #9873f8 5%, #A467F0 95%)',
+            backgroundImage:
+              'linear-gradient(180deg, #9973F9 10%, #9C6FF6 90%)',
           }}
           theme="light"
           mode="inline"
-          defaultSelectedKeys={['1']}
-          items={items.map(item => ({
-            ...item,
-            onClick: () => handleMenuClick(item),
-          }))}
+          items={items}
+          onClick={handleMenuClick}
         />
       </Sider>
       <Layout>

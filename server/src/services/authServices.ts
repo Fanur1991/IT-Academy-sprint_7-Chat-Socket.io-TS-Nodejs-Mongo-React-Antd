@@ -14,6 +14,7 @@ import {
 import qs from 'qs';
 import UserModel from '../models/UserModel';
 import axios from 'axios';
+import { Types } from 'mongoose';
 
 dotenv.config();
 
@@ -31,7 +32,7 @@ export const comparePasswords = async (
   return await bcrypt.compare(password, passwordHash);
 };
 
-export const createToken = (userId: string): Token => {
+export const createToken = (userId: Types.ObjectId): Token => {
   return jwt.sign({ userId }, JWT_SECRET, {
     expiresIn: '1d',
   });
@@ -59,12 +60,12 @@ export const createUser = async (userData: ICreateUser): Promise<IUser> => {
     });
 
     return {
-      _id: newUser._id.toString(),
+      _id: newUser._id,
       username: newUser.username,
       email: newUser.email,
       room: newUser.room,
       isGoogleAccount: false,
-      token: createToken(newUser._id.toString()),
+      token: createToken(newUser._id),
     };
   } catch (error: any) {
     if (error.message) {
@@ -86,11 +87,11 @@ export const loginUser = async (userData: ILoginUser): Promise<IUser> => {
 
     if (foundUser.isGoogleAccount) {
       return {
-        _id: foundUser._id.toString(),
+        _id: foundUser._id,
         username: foundUser.username,
         email: foundUser.email,
         room: foundUser.room,
-        token: createToken(foundUser._id.toString()),
+        token: createToken(foundUser._id),
       };
     }
 
@@ -105,11 +106,11 @@ export const loginUser = async (userData: ILoginUser): Promise<IUser> => {
 
     if (comparedPassword) {
       return {
-        _id: foundUser._id.toString(),
+        _id: foundUser._id,
         username: foundUser.username,
         email: foundUser.email,
         room: foundUser.room,
-        token: createToken(foundUser._id.toString()),
+        token: createToken(foundUser._id),
       };
     } else {
       return Promise.reject(new Error('Incorrect password'));
@@ -131,7 +132,7 @@ export const getUserData = async (email: string): Promise<IGetUser> => {
     }
 
     return {
-      _id: foundUser._id.toString(),
+      _id: foundUser._id,
       username: foundUser.username,
       email: foundUser.email,
       room: foundUser.room,
@@ -234,10 +235,10 @@ export const findAndUpdateUser = async (
     }
 
     return {
-      _id: result._id.toString(),
+      _id: result._id,
       username: result.username,
       email: result.email,
-      token: createToken(result._id.toString()),
+      token: createToken(result._id),
       room: result.room,
       isGoogleAccount: result.isGoogleAccount,
     };

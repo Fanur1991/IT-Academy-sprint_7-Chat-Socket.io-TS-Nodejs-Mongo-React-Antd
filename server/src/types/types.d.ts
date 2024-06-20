@@ -3,12 +3,13 @@ import 'express';
 declare module 'express' {
   export interface Request {
     user?: {
-      _id: string;
+      _id: Types.ObjectId;
     };
   }
 }
 
 import { JwtPayload } from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
 export interface ICreateUser {
   username: string;
@@ -23,7 +24,7 @@ export interface ILoginUser {
 }
 
 export interface IUser {
-  _id: string;
+  _id: Types.ObjectId;
   username: string;
   email: string;
   token?: string;
@@ -42,7 +43,7 @@ export type ComparedPassword = boolean;
 export type VerifiedToken = string | JwtPayload;
 
 export default interface IChatRoom {
-  _id: string;
+  _id: Types.ObjectId;
   name: string;
   description: string;
   createdAt: Date;

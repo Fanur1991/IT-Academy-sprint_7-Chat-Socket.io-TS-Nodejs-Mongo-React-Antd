@@ -25,24 +25,20 @@ const { TabPane } = Tabs;
 const { Title } = Typography;
 const { Option } = Select;
 
-const rooms = [
+export const rooms = [
   'JavaScript',
   'TypeScript',
   'HTML',
   'CSS',
-  'SASS',
-  'Ant Design',
   'React',
   'NodeJS',
   'Express',
   'NextJS',
   'MongoDB',
   'PostgreSQL',
-  'MySQL',
   'Git',
   'Docker',
   'Jest',
-  'TDD',
 ];
 
 const AuthPage: React.FC = () => {

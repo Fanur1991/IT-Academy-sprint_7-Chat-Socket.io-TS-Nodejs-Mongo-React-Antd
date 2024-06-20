@@ -19,7 +19,7 @@ const createExpressApp = (): Express => {
     cors({
       origin: 'http://localhost:5173',
       credentials: true,
-      methods: ['GET', 'POST', 'OPTIONS'],
+      methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
     })
   );
 

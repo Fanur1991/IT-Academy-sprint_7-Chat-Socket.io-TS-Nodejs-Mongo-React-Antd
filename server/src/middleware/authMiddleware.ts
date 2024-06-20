@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../services/authServices';
+import { Types } from 'mongoose';
 
 export const authMiddleware = async (
   req: Request,
@@ -28,7 +29,7 @@ export const authMiddleware = async (
       return;
     }
     const decodedToken = (await verifyToken(token)) as {
-      _id: string;
+      _id: Types.ObjectId;
     };
 
     if (!decodedToken) {

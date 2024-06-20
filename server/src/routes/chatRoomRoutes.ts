@@ -1,15 +1,10 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
+import { changeRoom } from '../controllers/chatRoomControllers';
 
 const router = express.Router();
 
-// Get all rooms
-router.get('/rooms', authMiddleware);
-
-// Create new room
-router.post('/rooms', authMiddleware);
-
-// Delete room
-router.delete('/rooms/:roomId', authMiddleware);
+// Change user room
+router.patch('/rooms', authMiddleware, changeRoom);
 
 export default router;

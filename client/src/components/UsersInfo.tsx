@@ -61,7 +61,7 @@ const UsersInfo: React.FC = () => {
       align="start"
       vertical
     >
-      <Flex style={{ margin: '0 auto' }} justify="center" align="center">
+      <Flex justify="center" align="center">
         <Text style={{ fontSize: 12, color: '#8c8c8c' }}>
           Room:{' '}
           <Text style={{ fontSize: 12, fontWeight: 450 }}>
@@ -82,7 +82,10 @@ const UsersInfo: React.FC = () => {
         dataSource={onlineUsernames}
         renderItem={item => (
           <Flex justify="center" align="start" vertical>
-            <Tag color="success" style={{ marginLeft: 15, fontSize: 12 }}>
+            <Tag
+              color="success"
+              style={{ marginLeft: 15, fontSize: 12, marginBottom: 3 }}
+            >
               {item.username}
             </Tag>
           </Flex>
@@ -97,11 +100,14 @@ const UsersInfo: React.FC = () => {
         <Text style={{ fontSize: 12, color: '#8c8c8c' }}>Offline users:</Text>
       </Flex>
       <List
-        style={{ width: '100%' }}
+        style={{ width: '100%', marginTop: 3 }}
         dataSource={offlineUsernames}
         renderItem={item => (
           <Flex justify="center" align="start" vertical>
-            <Tag color="error" style={{ marginLeft: 15, fontSize: 12 }}>
+            <Tag
+              color="error"
+              style={{ marginLeft: 15, fontSize: 12, marginBottom: 3 }}
+            >
               {item.username}
             </Tag>
           </Flex>

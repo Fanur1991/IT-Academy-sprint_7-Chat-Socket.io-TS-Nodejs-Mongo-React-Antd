@@ -1,27 +1,37 @@
-// export const getRooms = () => {
-//   try {
-//     return rooms;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
+import { Types } from 'mongoose';
+import UserModel from '../models/UserModel';
+import { IUser } from '../types/types';
+import { createToken } from './authServices';
 
-// export const createRoom = (roomName: string) => {
-//   try {
-//     rooms.push(roomName);
+export const changeUserRoom = async (
+  userId: Types.ObjectId,
+  room: string
+): Promise<IUser> => {
+  try {
+    const foundUser = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        room,
+      },
+      {
+        new: true,
+      }
+    );
 
-//     return rooms;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
+    if (!foundUser) {
+      throw new Error('User not found');
+    }
 
-// export const deleteRoom = (roomName: string) => {
-//   try {
-//     rooms.filter(room => room.toLowerCase() !== roomName.toLowerCase().trim());
-
-//     return 'Room deleted successfully';
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
+    return {
+      _id: foundUser._id,
+      username: foundUser.username,
+      email: foundUser.email,
+      room: foundUser.room,
+      token: createToken(foundUser._id),
+      isGoogleAccount: foundUser.isGoogleAccount,
+    };
+  } catch (error: any) {
+    console.error('Error while changing room:', error.message);
+    throw new Error('Error while changing room');
+  }
+};
