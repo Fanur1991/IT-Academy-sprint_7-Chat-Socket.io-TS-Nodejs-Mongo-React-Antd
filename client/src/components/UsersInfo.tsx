@@ -1,34 +1,23 @@
 import { Flex, List, Typography, Tag } from 'antd';
 import { GoDotFill } from 'react-icons/go';
-import { useAuthContext } from '../context/AuthContext';
 import { useSocketContext } from '../context/SocketContext';
 import { useEffect, useState } from 'react';
 import { axiosInstance } from '../config/axios';
 import { IUser } from '../types/types';
+import { useRoomContext } from '../context/RoomContext';
 
 const { Text } = Typography;
 
 const UsersInfo: React.FC = () => {
   const [users, setUsers] = useState<IUser[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const { authUser } = useAuthContext();
-  const { socket } = useSocketContext();
+  const { onlineUsers } = useSocketContext();
+  const { room } = useRoomContext();
 
   useEffect(() => {
-    getAllUsers();
-
-    if (socket) {
-      socket.on('getOnlineUsers', (users: string[]) => {
-        setOnlineUsers(users);
-      });
+    if (room) {
+      getAllUsers();
     }
-
-    return () => {
-      if (socket) {
-        socket.off('getOnlineUsers');
-      }
-    };
-  }, [socket]);
+  }, [room]);
 
   const getAllUsers = async () => {
     try {
@@ -53,7 +42,7 @@ const UsersInfo: React.FC = () => {
     <Flex
       style={{
         backgroundColor: '#F0F2F5',
-        borderRadius: 5,
+        borderRadius: 8,
         padding: 10,
         boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
       }}
@@ -63,10 +52,7 @@ const UsersInfo: React.FC = () => {
     >
       <Flex justify="center" align="center">
         <Text style={{ fontSize: 12, color: '#8c8c8c' }}>
-          Room:{' '}
-          <Text style={{ fontSize: 12, fontWeight: 450 }}>
-            {authUser?.room}
-          </Text>
+          Room: <Text style={{ fontSize: 12, fontWeight: 450 }}>{room}</Text>
         </Text>
       </Flex>
       <Flex justify="center" align="center">

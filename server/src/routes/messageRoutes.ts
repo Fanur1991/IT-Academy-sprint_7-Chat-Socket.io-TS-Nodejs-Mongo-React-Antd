@@ -1,10 +1,9 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
-import { changeRoom } from '../controllers/roomControllers';
+import { searchMessages } from '../controllers/messageControllers';
 
 const router = express.Router();
 
-// Change user room
-router.patch('/rooms', authMiddleware, changeRoom);
+router.get('/search', authMiddleware, searchMessages);
 
 export default router;

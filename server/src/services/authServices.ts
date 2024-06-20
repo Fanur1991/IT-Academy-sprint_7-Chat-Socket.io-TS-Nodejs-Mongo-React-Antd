@@ -261,7 +261,7 @@ export const completeGoogleAuthentication = async (
     throw new Error('Google account is not verified');
   }
 
-  const room = 'Default';
+  const room = 'General';
 
   const user = await findAndUpdateUser(
     { email: googleUser.email },

@@ -5,10 +5,11 @@ import { Server as SocketIOServer } from 'socket.io';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'body-parser';
-import { handleConnection } from '../handlers/chatHandlers';
+import { handleConnection } from '../controllers/chatControllers';
 import authRoutes from '../routes/authRoutes';
 import userRoutes from '../routes/userRoutes';
 import chatRoomRoutes from '../routes/chatRoomRoutes';
+import messageRoutes from '../routes/messageRoutes';
 
 const createExpressApp = (): Express => {
   const app = express();
@@ -34,6 +35,7 @@ const createExpressApp = (): Express => {
   app.use('/api', authRoutes);
   app.use('/api', userRoutes);
   app.use('/api', chatRoomRoutes);
+  app.use('/api', messageRoutes);
 
   return app;
 };

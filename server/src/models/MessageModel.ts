@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 export interface IMessage extends mongoose.Document {
   username: string;
   senderId: mongoose.Types.ObjectId;
-  chatRoomId: string;
+  chatRoomId: mongoose.Types.ObjectId;
   text: string;
   createdAt: Date;
 }
@@ -16,7 +16,7 @@ const messageSchema = new mongoose.Schema({
     required: true,
   },
   chatRoomId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
   text: { type: String, required: true },

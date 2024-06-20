@@ -5,6 +5,7 @@ import './index.css';
 import { ConfigProvider } from 'antd';
 import { AuthProvider } from './context/AuthContext.tsx';
 import { SocketContextProvider } from './context/SocketContext.tsx';
+import { RoomProvider } from './context/RoomContext.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             headerPadding: 0,
             headerColor: '#f0f2f5',
             headerBg: 'linear-gradient(270deg, #be4bdb 5%, #9775fa 95%)',
+            
           },
           Menu: {
             lineType: 'line',
@@ -55,7 +57,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     >
       <AuthProvider>
         <SocketContextProvider>
-          <App />
+          <RoomProvider>
+            <App />
+          </RoomProvider>
         </SocketContextProvider>
       </AuthProvider>
     </ConfigProvider>

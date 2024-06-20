@@ -1,4 +1,6 @@
 import 'express';
+import { JwtPayload } from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
 declare module 'express' {
   export interface Request {
@@ -7,9 +9,6 @@ declare module 'express' {
     };
   }
 }
-
-import { JwtPayload } from 'jsonwebtoken';
-import { Types } from 'mongoose';
 
 export interface ICreateUser {
   username: string;
@@ -41,10 +40,3 @@ export type HashPassword = string;
 export type ComparedPassword = boolean;
 
 export type VerifiedToken = string | JwtPayload;
-
-export default interface IChatRoom {
-  _id: Types.ObjectId;
-  name: string;
-  description: string;
-  createdAt: Date;
-}

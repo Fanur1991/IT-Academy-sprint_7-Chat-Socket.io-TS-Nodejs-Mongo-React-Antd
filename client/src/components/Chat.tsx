@@ -1,82 +1,68 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, Button, Flex, Card, List, Typography } from 'antd';
+import {
+  Input,
+  Button,
+  Flex,
+  Card,
+  List,
+  Typography,
+  Dropdown,
+  Menu,
+} from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { useAuthContext } from '../context/AuthContext';
 import { useSocketContext } from '../context/SocketContext';
-import { IMessage } from '../types/types';
+import { useRoomContext } from '../context/RoomContext';
+import { IMessage, IChatProps } from '../types/types';
+import { SmileIcon } from '../data/customIcons';
+import { emojis } from '../data/customIcons';
+import type { MenuProps } from 'antd';
 
 const { Text } = Typography;
 
-const Chat: React.FC = () => {
-  // const [socket, setSocket] = useState<any>(null);
-  // const socketRef = useRef(socket);
-  // const [messages, setMessages] = useState<IMessage[]>([]);
-  // const [inputMessage, setInputMessage] = useState<string>('');
-  // const { authUser } = useAuthContext();
-  // const { socket } = useSocketContext();
-  // const messageEndRef = useRef<HTMLDivElement | null>(null);
-
+const Chat: React.FC<IChatProps> = ({ searchResults }) => {
   const { authUser } = useAuthContext();
-  const { socket, onlineUsers } = useSocketContext();
+  const { socket } = useSocketContext();
+  const { room } = useRoomContext();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState<string>('');
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  // console.log('socket', socket);
-  // console.log('onlineUsers', onlineUsers);
+  // Creating menu items for dropdown emojis
+  const items: MenuProps['items'] = emojis.map((emoji, index) => ({
+    label: <span onClick={() => handleEmojiClick(emoji)}>{emoji}</span>,
+    key: index.toString(),
+  }));
 
-  // useEffect(() => {
-  //   if (!authUser || !authUser._id) return;
+  const handleEmojiClick = (emoji: string) => {
+    setInputMessage(prev => prev + emoji);
+  };
 
-  //   if (!socketRef.current) {
-  //     const newSocket = io('http://localhost:5555', {
-  //       withCredentials: true,
-  //       transports: ['websocket'],
-  //       query: { userId: authUser._id },
-  //     });
-
-  //     setSocket(newSocket);
-
-  //     newSocket.on('connect', () => {
-  //       console.log('Socket connected:', newSocket.id);
-  //     });
-
-  //     socketRef.current = newSocket;
-
-  //     newSocket.on('roomHistory', (receivedMessages: IMessage[]) => {
-  //       setMessages(receivedMessages);
-  //     });
-
-  //     newSocket.on('receiveMessage', (message: IMessage) => {
-  //       console.log('Message received: ', message);
-  //       setMessages(prevMessages => [...prevMessages, message]);
-  //     });
-
-  //     newSocket.emit('joinRoom', room);
-
-  //     return () => {
-  //       newSocket.close();
-  //       socketRef.current = null;
-  //     };
-  //   }
-  // }, [authUser, room]);
+  const emojiMenu = (
+    <Menu
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(6, 1fr)',
+        gap: '5px',
+        padding: '10px',
+        maxHeight: '200px',
+        overflowY: 'auto',
+      }}
+      items={items}
+    />
+  );
 
   useEffect(() => {
-    if (socket) {
-      socket.on('connect', () => {
-        console.log('Socket connected:', socket.id);
-      });
-
+    if (socket && room) {
       socket.on('roomHistory', (receivedMessages: IMessage[]) => {
         setMessages(receivedMessages);
       });
 
       socket.on('receiveMessage', (message: IMessage) => {
-        console.log('Message received: ', message);
         setMessages(prevMessages => [...prevMessages, message]);
       });
 
-      socket.emit('joinRoom', authUser?.room);
+      socket.emit('joinRoom', room);
 
       return () => {
         socket.off('connect');
@@ -84,42 +70,21 @@ const Chat: React.FC = () => {
         socket.off('receiveMessage');
       };
     }
-  }, [socket, authUser?.room]);
-
-  // useEffect(() => {
-  //   if (messageEndRef.current) {
-  //     messageEndRef.current!.scrollIntoView({ behavior: 'smooth' });
-  //   }
-  // }, [messages]);
+  }, [socket, room]);
 
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current!.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
-
-  // const sendMessage = () => {
-  //   if (inputMessage && socket) {
-
-  //     socket.emit('send_message', {
-  //       text: inputMessage,
-  //       senderId: authUser?._id,
-  //       username: authUser?.username,
-  //       room,
-  //     });
-
-  //     setInputMessage('');
-  //   }
-  // };
+  }, [messages, searchResults]);
 
   const sendMessage = () => {
-    if (inputMessage && socket && authUser) {
+    if (inputMessage && socket && authUser && room) {
       const messageData = {
         text: inputMessage,
         senderId: authUser._id,
         username: authUser.username,
-        room: authUser.room,
-        createdAt: new Date().toISOString(),
+        room: room,
       };
 
       socket.emit('sendMessage', messageData);
@@ -127,6 +92,8 @@ const Chat: React.FC = () => {
       setInputMessage('');
     }
   };
+
+  const displayedMessages = searchResults.length > 0 ? searchResults : messages;
 
   return (
     <div
@@ -138,7 +105,9 @@ const Chat: React.FC = () => {
         gap: '10px',
         width: '100%',
         height: '100%',
-        borderRadius: '10px',
+        borderRadius: '8px',
+        background: '#f0f2f5',
+        padding: '10px',
       }}
     >
       <div
@@ -150,14 +119,14 @@ const Chat: React.FC = () => {
         }}
       >
         <List
-          dataSource={messages}
+          dataSource={displayedMessages}
           renderItem={(msg, index) => (
             <List
               style={{
                 display: 'flex',
                 justifyContent:
                   msg.senderId === authUser?._id ? 'flex-end' : 'flex-start',
-                padding: '10px',
+                padding: '7px',
               }}
             >
               <Card
@@ -165,6 +134,7 @@ const Chat: React.FC = () => {
                 style={{
                   maxWidth: '100%',
                   borderRadius: '10px',
+                  background: '#fff',
                   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                   border: 'none',
                   padding: '0 12px',
@@ -194,7 +164,6 @@ const Chat: React.FC = () => {
             </List>
           )}
         />
-
         <div ref={messageEndRef} />
       </div>
       <Flex
@@ -204,14 +173,24 @@ const Chat: React.FC = () => {
         gap="middle"
       >
         <Input
+          prefix=""
           style={{ width: '100%' }}
           value={inputMessage}
           onChange={e => setInputMessage(e.target.value)}
-          placeholder="Enter message"
+          placeholder="Enter message..."
           onPressEnter={sendMessage}
+          suffix={
+            <Dropdown
+              overlay={emojiMenu}
+              trigger={['click']}
+              placement="topCenter"
+            >
+              <SmileIcon style={{ color: '#722ed1', cursor: 'pointer' }} />
+            </Dropdown>
+          }
         />
         <Button type="primary" onClick={sendMessage}>
-          <SendOutlined style={{ color: 'white' }} />
+          <SendOutlined style={{ color: '#ffffff' }} />
         </Button>
       </Flex>
     </div>

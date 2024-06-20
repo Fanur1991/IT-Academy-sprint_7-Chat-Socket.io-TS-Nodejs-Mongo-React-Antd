@@ -10,6 +10,13 @@ export interface IUser {
   token?: string;
 }
 
+export type UserData = {
+  _id: string;
+  username: string;
+  email: string;
+  room: string;
+};
+
 export interface ISocketContext {
   socket: Socket | null;
   onlineUsers: string[];
@@ -30,4 +37,8 @@ export interface IMessage {
   senderId: string;
   room: string;
   createdAt: Date | string;
+}
+
+export interface IChatProps {
+  searchResults: IMessage[];
 }

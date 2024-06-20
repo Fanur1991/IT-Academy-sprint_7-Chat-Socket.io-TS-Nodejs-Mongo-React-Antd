@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 
 export interface IChat extends mongoose.Document {
-  name: string;
+  roomName: string;
   messages: mongoose.Types.ObjectId[];
   members: mongoose.Types.ObjectId[];
 }
 
 const chatSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  roomName: { type: String, required: true },
   messages: [
     {
       type: mongoose.Schema.Types.ObjectId,

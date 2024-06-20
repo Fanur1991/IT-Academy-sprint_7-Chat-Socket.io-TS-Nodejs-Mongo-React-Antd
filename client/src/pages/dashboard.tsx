@@ -1,33 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CommentOutlined, LogoutOutlined } from '@ant-design/icons';
+import { LogoutOutlined } from '@ant-design/icons';
 import {
   Layout,
   Menu,
-  theme,
   Typography,
   Flex,
   Avatar,
   Button,
   message,
+  Input,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import Cookies from 'js-cookie';
 import Chat from '../components/Chat';
 import { useAuthContext } from '../context/AuthContext';
+import { useRoomContext } from '../context/RoomContext';
 import UsersInfo from '../components/UsersInfo';
-import { rooms } from './AuthPage';
+import { rooms } from '../data/customIcons';
 import { axiosInstance } from '../config/axios';
+import { IoSearchOutline } from 'react-icons/io5';
+import { UserData } from '../types/types';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Text } = Typography;
-
-type UserData = {
-  _id: string;
-  username: string;
-  email: string;
-  room: string;
-};
 
 const Dashboard: React.FC = () => {
   const [userData, setUserData] = useState<UserData>({
@@ -36,20 +32,18 @@ const Dashboard: React.FC = () => {
     email: '',
     room: '',
   });
-  const [room, setRoom] = useState<string>('');
-  const [avatarSeed, setAvatarSeed] = useState(() => Math.random().toFixed(2));
+  const [avatarSeed, _setAvatarSeed] = useState(() => Math.random().toFixed(2));
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [searchResults, setSearchResults] = useState([]);
   const { authUser } = useAuthContext();
+  const { room, setRoom } = useRoomContext();
   const navigate = useNavigate();
-
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
 
   const handleMenuClick: MenuProps['onClick'] = async (e: any) => {
     try {
       const response = await axiosInstance.patch(
         `/api/rooms`,
-        { room: rooms[parseInt(e.key)] },
+        { room: rooms.map(room => room.name)[parseInt(e.key)] },
         {
           headers: {
             Authorization: `Bearer ${authUser?.token}`,
@@ -58,31 +52,26 @@ const Dashboard: React.FC = () => {
         }
       );
 
-      console.log('Room changed successfully:', response.data.room);
+      const stringifiedData = JSON.stringify(response.data);
 
-      sessionStorage.setItem('userData', JSON.stringify(response.data));
-      Cookies.set('userData', JSON.stringify(response.data));
+      // Save the response data in session and cookie storages
+      sessionStorage.setItem('userData', stringifiedData);
+      Cookies.set('userData', stringifiedData);
 
       setRoom(response.data.room);
 
-      message.success('Room changed successfully');
+      message.success('Room changed');
     } catch (error: any) {
       console.error('Failed to change room:', error);
       message.error('Failed to change room');
     }
   };
 
-  const items: MenuProps['items'] = [
-    {
-      key: 'First',
-      icon: <CommentOutlined />,
-      label: room,
-      children: rooms.map((room, index) => ({
-        key: index.toString(),
-        label: room,
-      })),
-    },
-  ];
+  const items: MenuProps['items'] = rooms.map((room, index) => ({
+    key: index.toString(),
+    icon: room.icon,
+    label: room.name,
+  }));
 
   useEffect(() => {
     if (authUser) {
@@ -92,6 +81,30 @@ const Dashboard: React.FC = () => {
       navigate('/login', { replace: true });
     }
   }, [authUser, setRoom]);
+
+  const handleLogout = () => {
+    Cookies.remove('userData');
+    sessionStorage.clear();
+    navigate('/login');
+  };
+
+  const handleSearch = async () => {
+    try {
+      const response = await axiosInstance.get('/api/search', {
+        params: {
+          room,
+          query: searchValue,
+        },
+        withCredentials: true,
+      });
+
+      setSearchResults(response.data);
+      setSearchValue('');
+    } catch (error: any) {
+      console.error('Failed to search messages:', error);
+      message.error('Failed to search messages');
+    }
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -125,12 +138,13 @@ const Dashboard: React.FC = () => {
         <Menu
           style={{
             backgroundImage:
-              'linear-gradient(180deg, #9973F9 10%, #9C6FF6 90%)',
+              'linear-gradient(180deg, #9973F8 10%, #BC4CDC 90%)',
           }}
           theme="light"
           mode="inline"
           items={items}
           onClick={handleMenuClick}
+          selectedKeys={[`${rooms.map(room => room.name).indexOf(room)}`]}
         />
       </Sider>
       <Layout>
@@ -141,16 +155,28 @@ const Dashboard: React.FC = () => {
             alignItems: 'center',
             padding: '0',
             overflow: 'initial',
+            columnGap: '50px',
           }}
         >
+          <Input
+            prefix=""
+            style={{ width: '20%' }}
+            size="small"
+            value={searchValue}
+            onChange={e => setSearchValue(e.target.value)}
+            placeholder={`Search message in ${room}...`}
+            onPressEnter={handleSearch}
+            suffix={
+              <IoSearchOutline
+                style={{ color: '#722ed1', cursor: 'pointer' }}
+                onClick={handleSearch}
+              />
+            }
+          />
           <Button
             type="link"
             style={{ marginRight: '64px', color: '#F5F5F5' }}
-            onClick={() => {
-              Cookies.remove('userData');
-              sessionStorage.clear();
-              navigate('/login');
-            }}
+            onClick={handleLogout}
           >
             Logout
             <LogoutOutlined />
@@ -159,10 +185,10 @@ const Dashboard: React.FC = () => {
         <Content
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: 'start',
             alignItems: 'center',
-            gap: '24px',
-            margin: '24px 16px 0',
+            gap: '0px',
+            margin: '0px 0px 0',
             overflow: 'initial',
             borderRadius: 10,
           }}
@@ -173,18 +199,16 @@ const Dashboard: React.FC = () => {
               height: '100%',
               width: '75%',
               background: '#efdbff',
-              borderRadius: borderRadiusLG,
             }}
           >
-            <Chat />
+            <Chat searchResults={searchResults} />
           </div>
           <div
             style={{
               padding: 24,
               height: '100%',
-              width: '20%',
+              width: '25%',
               background: '#ffd6e7',
-              borderRadius: borderRadiusLG,
             }}
           >
             <UsersInfo />

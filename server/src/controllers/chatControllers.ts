@@ -29,9 +29,9 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
     console.log(`User ${socket.id} joined room ${room}`);
 
     try {
-      let chatRoom = await ChatModel.findOne({ name: room });
+      let chatRoom = await ChatModel.findOne({ roomName: room });
       if (!chatRoom) {
-        chatRoom = new ChatModel({ name: room, members: [], messages: [] });
+        chatRoom = new ChatModel({ roomName: room, members: [], messages: [] });
         await chatRoom.save();
 
         console.log(`New chat room created with ID: ${room}`);
@@ -61,7 +61,9 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
   // * Send message
   socket.on('sendMessage', async ({ username, text, senderId, room }) => {
     try {
-      const chatRoom = (await ChatModel.findOne({ name: room })) as IChat & {
+      const chatRoom = (await ChatModel.findOne({
+        roomName: room,
+      })) as IChat & {
         _id: mongoose.Types.ObjectId;
       };
       if (!chatRoom) {
@@ -71,8 +73,8 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
 
       const message = new MessageModel({
         username,
-        text,
         senderId,
+        text,
         chatRoomId: chatRoom._id,
       });
 
@@ -86,7 +88,7 @@ function handleConnection(socket: Socket, io: SocketIOServer) {
         text: message.text,
         senderId: message.senderId,
         username: message.username,
-        room: chatRoom._id.toString(),
+        room: chatRoom._id,
         createdAt: message.createdAt,
       });
     } catch (error) {

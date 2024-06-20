@@ -44,10 +44,12 @@ export const SocketContextProvider: React.FC<IAuthProviderProps> = ({
       });
 
       return () => {
+        socket.off('getOnlineUsers');
         socket.close();
       };
     } else {
       if (socket) {
+        socket.off('getOnlineUsers');
         socket.close();
         setSocket(null);
       }

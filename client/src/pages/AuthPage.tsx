@@ -20,26 +20,11 @@ import {
 import getGoogleOauthUrl from '../utils/getGoogleUrl';
 import Cookies from 'js-cookie';
 import { axiosInstance } from '../config/axios';
+import { rooms } from '../data/customIcons';
 
 const { TabPane } = Tabs;
 const { Title } = Typography;
 const { Option } = Select;
-
-export const rooms = [
-  'JavaScript',
-  'TypeScript',
-  'HTML',
-  'CSS',
-  'React',
-  'NodeJS',
-  'Express',
-  'NextJS',
-  'MongoDB',
-  'PostgreSQL',
-  'Git',
-  'Docker',
-  'Jest',
-];
 
 const AuthPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('register');
@@ -174,8 +159,8 @@ const AuthPage: React.FC = () => {
               rules={[{ required: true, message: 'Please input!' }]}
             >
               <Select allowClear showSearch placeholder="Select room">
-                {rooms.map(room => (
-                  <Option key={room}>{room}</Option>
+                {rooms.map((room, index) => (
+                  <Option key={index}>{room.name}</Option>
                 ))}
               </Select>
             </Form.Item>
