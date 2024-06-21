@@ -1,3 +1,4 @@
+// Rooms icons
 export const rooms = [
   {
     name: 'General',
@@ -311,6 +312,7 @@ import Icon from '@ant-design/icons';
 
 type CustomIconComponentProps = GetProps<typeof Icon>;
 
+// smile svg
 const smileSvg = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -332,10 +334,12 @@ const smileSvg = () => (
   </svg>
 );
 
+// Creating an icon component
 export const SmileIcon = (props: Partial<CustomIconComponentProps>) => {
   return <Icon component={smileSvg} {...props} />;
 };
 
+// Creating an array of emojis
 export const emojis = [
   '😀',
   '😂',

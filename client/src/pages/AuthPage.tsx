@@ -20,7 +20,7 @@ import {
 import getGoogleOauthUrl from '../utils/getGoogleUrl';
 import Cookies from 'js-cookie';
 import { axiosInstance } from '../config/axios';
-import { rooms } from '../data/customIcons';
+import { rooms } from '../data/data';
 
 const { TabPane } = Tabs;
 const { Title } = Typography;

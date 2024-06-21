@@ -14,8 +14,8 @@ import { useAuthContext } from '../context/AuthContext';
 import { useSocketContext } from '../context/SocketContext';
 import { useRoomContext } from '../context/RoomContext';
 import { IMessage, IChatProps } from '../types/types';
-import { SmileIcon } from '../data/customIcons';
-import { emojis } from '../data/customIcons';
+import { SmileIcon } from '../data/data';
+import { emojis } from '../data/data';
 import type { MenuProps } from 'antd';
 
 const { Text } = Typography;
@@ -52,6 +52,7 @@ const Chat: React.FC<IChatProps> = ({ searchResults }) => {
     />
   );
 
+  // Handling socket events
   useEffect(() => {
     if (socket && room) {
       socket.on('roomHistory', (receivedMessages: IMessage[]) => {
@@ -72,12 +73,14 @@ const Chat: React.FC<IChatProps> = ({ searchResults }) => {
     }
   }, [socket, room]);
 
+  // Scroll to the end of the message list
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current!.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, searchResults]);
 
+  // Sending messages
   const sendMessage = () => {
     if (inputMessage && socket && authUser && room) {
       const messageData = {
@@ -93,6 +96,7 @@ const Chat: React.FC<IChatProps> = ({ searchResults }) => {
     }
   };
 
+  // Displaying messages
   const displayedMessages = searchResults.length > 0 ? searchResults : messages;
 
   return (

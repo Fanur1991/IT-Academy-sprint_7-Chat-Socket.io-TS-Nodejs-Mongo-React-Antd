@@ -24,11 +24,12 @@ export interface ISocketContext {
 
 export interface IAuthContext {
   authUser: IUser | null;
-  setAuthUser: Dispatch<SetStateAction<IUser | null>>;
+  setAuthUser: (user: IUser | null) => void;
+  checkToken: () => Promise<void>;
 }
 
 export interface IAuthProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export interface IMessage {

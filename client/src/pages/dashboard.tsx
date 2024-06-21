@@ -12,14 +12,14 @@ import {
   Input,
 } from 'antd';
 import type { MenuProps } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
 import Chat from '../components/Chat';
 import { useAuthContext } from '../context/AuthContext';
 import { useRoomContext } from '../context/RoomContext';
 import UsersInfo from '../components/UsersInfo';
-import { rooms } from '../data/customIcons';
+import { rooms } from '../data/data';
 import { axiosInstance } from '../config/axios';
-import { IoSearchOutline } from 'react-icons/io5';
 import { UserData } from '../types/types';
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -90,6 +90,11 @@ const Dashboard: React.FC = () => {
 
   const handleSearch = async () => {
     try {
+      if (searchValue.trim() === '') {
+        setSearchResults([]);
+        return;
+      }
+
       const response = await axiosInstance.get('/api/search', {
         params: {
           room,
@@ -99,10 +104,18 @@ const Dashboard: React.FC = () => {
       });
 
       setSearchResults(response.data);
-      setSearchValue('');
     } catch (error: any) {
       console.error('Failed to search messages:', error);
       message.error('Failed to search messages');
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+
+    if (value.trim() === '') {
+      setSearchResults([]);
     }
   };
 
@@ -158,18 +171,25 @@ const Dashboard: React.FC = () => {
             columnGap: '50px',
           }}
         >
-          <Input
-            prefix=""
+          <Input.Search
             style={{ width: '20%' }}
             size="small"
             value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
+            onChange={handleSearchChange}
             placeholder={`Search message in ${room}...`}
             onPressEnter={handleSearch}
+            onSearch={handleSearch}
             suffix={
-              <IoSearchOutline
-                style={{ color: '#722ed1', cursor: 'pointer' }}
-                onClick={handleSearch}
+              <CloseOutlined
+                style={{
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  color: '#323232',
+                }}
+                onClick={() => {
+                  setSearchValue('');
+                  setSearchResults([]);
+                }}
               />
             }
           />

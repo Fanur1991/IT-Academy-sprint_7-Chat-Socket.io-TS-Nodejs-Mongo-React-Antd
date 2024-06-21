@@ -21,7 +21,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             headerPadding: 0,
             headerColor: '#f0f2f5',
             headerBg: 'linear-gradient(270deg, #be4bdb 5%, #9775fa 95%)',
-            
           },
           Menu: {
             lineType: 'line',

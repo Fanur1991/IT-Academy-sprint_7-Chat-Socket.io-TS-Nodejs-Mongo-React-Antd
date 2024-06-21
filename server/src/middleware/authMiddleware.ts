@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../services/authServices';
 import { Types } from 'mongoose';
+import { Token } from '../types/types';
 
 export const authMiddleware = async (
   req: Request,
@@ -11,7 +12,7 @@ export const authMiddleware = async (
     const authHeader = req.header('Authorization');
     const userData = req.cookies.userData;
 
-    let token;
+    let token: Token;
 
     if (authHeader) {
       const parts = authHeader.split(' ');

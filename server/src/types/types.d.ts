@@ -31,8 +31,6 @@ export interface IUser {
   isGoogleAccount?: boolean;
 }
 
-export type IGetUser = Omit<IUser, 'token'>;
-
 export type Token = string;
 
 export type HashPassword = string;

@@ -6,7 +6,6 @@ import {
   HashPassword,
   ICreateUser,
   ILoginUser,
-  IGetUser,
   IUser,
   Token,
   VerifiedToken,
@@ -34,11 +33,11 @@ export const comparePasswords = async (
 
 export const createToken = (userId: Types.ObjectId): Token => {
   return jwt.sign({ userId }, JWT_SECRET, {
-    expiresIn: '1d',
+    expiresIn: '5h',
   });
 };
 
-export const verifyToken = (token: string): string | VerifiedToken => {
+export const verifyToken = (token: Token): string | VerifiedToken => {
   return jwt.verify(token, JWT_SECRET);
 };
 
@@ -123,7 +122,7 @@ export const loginUser = async (userData: ILoginUser): Promise<IUser> => {
   }
 };
 
-export const getUserData = async (email: string): Promise<IGetUser> => {
+export const getUserData = async (email: string): Promise<IUser> => {
   try {
     const foundUser = await UserModel.findOne({ email });
 
@@ -137,6 +136,7 @@ export const getUserData = async (email: string): Promise<IGetUser> => {
       email: foundUser.email,
       room: foundUser.room,
       isGoogleAccount: foundUser.isGoogleAccount,
+      token: createToken(foundUser._id),
     };
   } catch (error: any) {
     if (error.message) {

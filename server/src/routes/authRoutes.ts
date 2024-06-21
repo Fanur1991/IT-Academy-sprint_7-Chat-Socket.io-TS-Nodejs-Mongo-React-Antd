@@ -16,7 +16,7 @@ router.post('/register', register);
 router.post('/login', login);
 
 // get user
-// router.get('/user', authMiddleware, getMe);
+router.get('/user', authMiddleware, getMe);
 
 // google auth
 router.get('/google-auth', googleAuth);
