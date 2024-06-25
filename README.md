@@ -67,32 +67,20 @@ cd IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
 
 2. Install all dependencies
 ```bash
-cd server
+cd client
 npm install
-cd ../client
+cd ../server
 npm install
 ```
 
 ### `Run Server and Client`
 
-3. The first way to run simultaneously server and client apps
+3. To run simultaneously server and client apps
 ```bash
-cd ..
-```
-or
-```bash
-cd IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
+cd server 
 ```
 ```bash
-npm run dev
-```
-
-4. The second way to run separately server and client apps
-```bash
-cd IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
-```
-```bash
-npm run dev
+npm run start
 ```
 
 ## Frontend
