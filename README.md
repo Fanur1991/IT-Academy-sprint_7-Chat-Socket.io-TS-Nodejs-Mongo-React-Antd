@@ -16,8 +16,8 @@
 > [!NOTE]
 > ### Level ⭐️
 
-> ✅ **Create an application that displays a login page where the user can enter a chat room (client and server must be completely separate). By opening the same URL in another browser window, we can log in with another user. Verify that they are in the same room and allow them to chat.** 
-> ✅ **Add the ability to create multiple chat rooms and manage persistence with MongoDB (with Mongoose).**
+> ✅ Create an application that displays a login page where the user can enter a chat room (client and server must be completely separate). By opening the same URL in another browser window, we can log in with another user. Verify that they are in the same room and allow them to chat.<br> 
+> ✅ Add the ability to create multiple chat rooms and manage persistence with MongoDB (with Mongoose).
 
 > ### Level ⭐️⭐️
 
