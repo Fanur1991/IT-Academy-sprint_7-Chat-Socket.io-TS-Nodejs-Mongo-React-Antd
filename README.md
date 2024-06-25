@@ -1,5 +1,7 @@
 # The Chat Full-Stack Application
 
+This is a simple full-stack chat application for educational purposes. It uses Socket.io for real-time messaging, React with Ant Design for the frontend, and Node.js with Express for the backend. Users can sign in, join/change chat rooms, and message other users in real time.
+
 ## Technologies
 
 ![Socket.io](https://img.shields.io/badge/-Socket.io-black?style=flat-square&logo=socketdotio&logoColor=white)
@@ -56,14 +58,59 @@
 1. Clone the repository:
 ```bash
 git clone https://github.com/Fanur1991/IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
+```
+```bash
 cd IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
 ```
 
 ### `Install Dependencies`
 
-```
+2. Install all dependencies
+```bash
 cd server
 npm install
 cd ../client
 npm install
 ```
+
+### `Run Server and Client`
+
+3. The first way to run simultaneously server and client apps
+```bash
+cd ..
+```
+or
+```bash
+cd IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
+```
+```bash
+npm run dev
+```
+
+4. The second way to run separately server and client apps
+```bash
+cd IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
+```
+```bash
+npm run dev
+```
+
+## Frontend
+
+A frontend is developed to interact with the backend, providing a user-friendly interface for chat between users.
+
+### Login page:
+
+![Login page](./login.png)
+
+### Home page:
+
+![Home page](./dashboard.png)
+
+## License
+
+This project is distributed under the Apache 2.0 license.
+
+---
+
+Developed by [Fanur Khusainov](https://www.linkedin.com/in/fanur-khusainov-ab86b2102/) with ❤️ and ☕.
