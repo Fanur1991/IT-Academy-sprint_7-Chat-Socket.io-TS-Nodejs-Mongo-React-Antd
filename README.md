@@ -16,7 +16,7 @@
 > [!NOTE]
 > ### Level ⭐️
 >
-> ✅ Create an application that displays a login page where the user can enter a chat room (client and server must be completely separate). By opening the same URL in another browser window, we can log in with another user. Verify that they are in the same room and allow them to chat.<br> 
+> ✅ Create an application that displays a login page where the user can enter a chat room. By opening the same URL in another browser window, we can log in with another user. Verify that they are in the same room and allow them to chat.<br> 
 > ✅ Add the ability to create multiple chat rooms and manage persistence with MongoDB (with Mongoose).
 >
 > ### Level ⭐️⭐️
@@ -27,15 +27,15 @@
 >
 > ✅ **Additional features:**
 >
-> ⚡️ SingUp of users to create a user and access chat rooms.
-> ⚡️ User logout to log out of chat rooms.
-> ⚡️ Search field to search for chat messages.
-> ⚡️ List of users in chat room (online/offline).
-> ⚡️ Indicator of connected users in the chat room.
-> ⚡️ Possibility to choose a room.
+> ⚡️ SingUp of users to create a user and access chat rooms.<br>
+> ⚡️ User logout to log out of chat rooms.<br>
+> ⚡️ Search field to search for chat messages.<br>
+> ⚡️ List of users in chat room (online/offline).<br>
+> ⚡️ Indicator of connected users in the chat room.<br>
+> ⚡️ Possibility to choose a room.<br>
 >
-> ✅ Use of TypeScript for the development of the project.
-> ✅ Use of React for client development.
-> ✅ Use of Ant Design for design development.
+> ✅ Use of TypeScript for the development of the project.<br>
+> ✅ Use of React for client development.<br>
+> ✅ Use of Ant Design for design development.<br>
 
 Google Oauth 2
