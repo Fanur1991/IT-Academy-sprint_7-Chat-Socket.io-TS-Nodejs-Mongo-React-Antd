@@ -1,10 +1,5 @@
 # The Chat Full-Stack Application
 
-
-
-## Technologies
-
-
 ## Technologies
 
 ![Socket.io](https://img.shields.io/badge/-Socket.io-black?style=flat-square&logo=socketdotio&logoColor=white)
@@ -15,6 +10,14 @@
 ![Mongoose](https://img.shields.io/badge/-Mongoose-880000?style=flat-square&logo=mongoose&logoColor=white)
 ![React](https://img.shields.io/badge/-React-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![Ant Design](https://img.shields.io/badge/-Ant_Design-0170FE?style=flat-square&logo=antdesign&logoColor=white)
+
+## Features
+
+- **Multiple Chat Rooms**: Users can create and join multiple chat rooms.
+- **Real-Time Communication**: Built with Socket.io for real-time interaction.
+- **User Authentication**: Implements Google OAuth 2 for secure access.
+- **Persistence**: Chat history and user data are stored using MongoDB with Mongoose.
+- **Advanced Features**: Includes user signup and logout, a search field for chat messages, real-time online/offline status, and more.
 
 > [!NOTE]
 > ### Level ⭐️
@@ -41,4 +44,26 @@
 > ✅ Use of React for client development.<br>
 > ✅ Use of Ant Design for design development.<br>
 
-Google Oauth 2
+## Getting Started
+
+### `Prerequisites`
+
+- [Node.js](https://nodejs.org/en/download/package-manager) installed
+- MongoDB running on your local machine or remotely
+
+### `Installation`
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Fanur1991/IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
+cd IT-Academy-sprint_7-Chat-Socket.io-TS-Nodejs-Mongo-React-Antd
+```
+
+### `Install Dependencies`
+
+```
+cd server
+npm install
+cd ../client
+npm install
+```
